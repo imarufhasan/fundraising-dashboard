@@ -229,17 +229,17 @@ export default function SupportPage() {
                   {/* Status */}
                   <td className="py-4 px-6">
                     {t.status === "Open" && (
-                      <span className="rounded-full bg-rose-50 px-3 py-1 text-[10px] font-bold text-rose-600 border border-rose-100">
+                      <span className="rounded-full bg-rose-50 px-3 py-1 text-[12px] font-bold text-rose-600 border border-rose-100">
                         Open
                       </span>
                     )}
                     {t.status === "In Progress" && (
-                      <span className="rounded-full bg-amber-50 px-3 py-1 text-[10px] font-bold text-amber-600 border border-amber-100">
+                      <span className="rounded-full bg-amber-50 px-3 py-1 text-[12px] font-bold text-amber-600 border border-amber-100">
                         In Progress
                       </span>
                     )}
                     {t.status === "Resolved" && (
-                      <span className="rounded-full bg-slate-50 px-3 py-1 text-[10px] font-bold text-slate-500 border border-slate-100">
+                      <span className="rounded-full bg-slate-50 px-3 py-1 text-[12px] font-bold text-slate-500 border border-slate-100">
                         Resolved
                       </span>
                     )}
@@ -308,7 +308,7 @@ export default function SupportPage() {
                 <h2 className="mt-1 text-base font-black text-slate-950 leading-tight">
                   {selectedTicket.subject}
                 </h2>
-                <div className="mt-0.5 text-[10px] font-semibold text-slate-500">
+                <div className="mt-0.5 text-[12px] font-semibold text-slate-500">
                   User: <b className="text-slate-700">{selectedTicket.user}</b> • Campaign: <b className="text-slate-700">{selectedTicket.campaign}</b>
                 </div>
               </div>

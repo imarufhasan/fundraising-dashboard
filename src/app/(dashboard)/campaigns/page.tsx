@@ -152,7 +152,7 @@ export default function CampaignsPage() {
                     <div className="font-extrabold text-slate-900 leading-tight">
                       {campaign.name}
                     </div>
-                    <div className="text-[10px] text-slate-400 font-semibold mt-0.5">
+                    <div className="text-[12px] text-slate-400 font-semibold mt-0.5">
                       {campaign.date}
                     </div>
                   </td>
@@ -165,7 +165,7 @@ export default function CampaignsPage() {
                   {/* Progress Bar */}
                   <td className="py-4 px-6">
                     <div className="w-40 space-y-1">
-                      <div className="flex items-center justify-between text-[10px] font-bold">
+                      <div className="flex items-center justify-between text-[12px] font-bold">
                         <span className="text-slate-900">${(campaign.raised / 1000).toFixed(1)}k</span>
                         <span className="text-slate-500">{campaign.percentage}%</span>
                       </div>
@@ -184,17 +184,17 @@ export default function CampaignsPage() {
                   {/* Status Badge */}
                   <td className="py-4 px-6">
                     {campaign.status === "Active" && (
-                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold text-emerald-600 border border-emerald-100">
+                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-[12px] font-bold text-emerald-600 border border-emerald-100">
                         Active
                       </span>
                     )}
                     {campaign.status === "Completed" && (
-                      <span className="rounded-full bg-blue-50 px-3 py-1 text-[10px] font-bold text-blue-600 border border-blue-100">
+                      <span className="rounded-full bg-blue-50 px-3 py-1 text-[12px] font-bold text-blue-600 border border-blue-100">
                         Completed
                       </span>
                     )}
                     {campaign.status === "Flagged" && (
-                      <span className="rounded-md bg-rose-50 px-2.5 py-0.5 text-[10px] font-extrabold text-rose-600 border-2 border-rose-600 leading-normal inline-block uppercase tracking-wider">
+                      <span className="rounded-md bg-rose-50 px-2.5 py-0.5 text-[12px] font-extrabold text-rose-600 border-2 border-rose-600 leading-normal inline-block uppercase tracking-wider">
                         Flagged
                       </span>
                     )}
@@ -283,7 +283,7 @@ export default function CampaignsPage() {
             <div className="mt-5 space-y-5">
               {/* Description */}
               <div>
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Description</h4>
+                <h4 className="text-[12px] font-bold uppercase tracking-wider text-slate-400">Description</h4>
                 <p className="mt-1 text-sm leading-relaxed text-slate-600 font-medium">
                   {selectedCampaign.description || "No description provided for this campaign."}
                 </p>
@@ -292,19 +292,19 @@ export default function CampaignsPage() {
               <div className="grid grid-cols-2 gap-4">
                 {/* Organizer */}
                 <div className="rounded-xl bg-slate-50/50 p-3 border border-slate-100">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="flex items-center gap-1.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider">
                     <User className="size-3.5 text-slate-500" />
                     Organizer
                   </div>
                   <div className="mt-1 text-sm font-bold text-slate-800">{selectedCampaign.organizer}</div>
                   {selectedCampaign.email && (
-                    <div className="text-[10px] text-slate-500 mt-0.5 truncate">{selectedCampaign.email}</div>
+                    <div className="text-[12px] text-slate-500 mt-0.5 truncate">{selectedCampaign.email}</div>
                   )}
                 </div>
 
                 {/* Launch Date */}
                 <div className="rounded-xl bg-slate-50/50 p-3 border border-slate-100">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="flex items-center gap-1.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider">
                     <Calendar className="size-3.5 text-slate-500" />
                     Launch Date
                   </div>
@@ -327,15 +327,15 @@ export default function CampaignsPage() {
 
                 <div className="grid grid-cols-3 gap-2 pt-2 text-center">
                   <div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Raised</div>
+                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Raised</div>
                     <div className="text-sm font-black text-emerald-600">${selectedCampaign.raised.toLocaleString()}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Goal</div>
+                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Goal</div>
                     <div className="text-sm font-black text-slate-800">${selectedCampaign.goal.toLocaleString()}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Orders</div>
+                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Orders</div>
                     <div className="text-sm font-black text-indigo-600">{selectedCampaign.orders}</div>
                   </div>
                 </div>

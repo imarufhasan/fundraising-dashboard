@@ -115,7 +115,7 @@ export default function TransactionsPage() {
           <div className="space-y-1">
             <span className="text-sm font-semibold text-slate-400">Gross Volume</span>
             <div className="text-2xl font-black text-slate-900">$3,670</div>
-            <p className="text-[10px] text-slate-500 font-medium">All transactions</p>
+            <p className="text-[12px] text-slate-500 font-medium">All transactions</p>
           </div>
           <div className="flex size-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
             <DollarSign className="size-5" />
@@ -127,7 +127,7 @@ export default function TransactionsPage() {
           <div className="space-y-1">
             <span className="text-sm font-semibold text-slate-400">Platform Fees</span>
             <div className="text-2xl font-black text-slate-900">$32.00</div>
-            <p className="text-[10px] text-slate-500 font-medium">Earned this period</p>
+            <p className="text-[12px] text-slate-500 font-medium">Earned this period</p>
           </div>
           <div className="flex size-11 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
             <TrendingUp className="size-5" />
@@ -139,7 +139,7 @@ export default function TransactionsPage() {
           <div className="space-y-1">
             <span className="text-sm font-semibold text-slate-400">Disputes</span>
             <div className="text-2xl font-black text-slate-900">1</div>
-            <p className="text-[10px] text-slate-500 font-medium">$45 chargeback</p>
+            <p className="text-[12px] text-slate-500 font-medium">$45 chargeback</p>
           </div>
           <div className="flex size-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
             <AlertTriangle className="size-5" />
@@ -205,22 +205,22 @@ export default function TransactionsPage() {
                   {/* Type Badge */}
                   <td className="py-4 pr-4">
                     {tx.type === "Order" && (
-                      <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600 border border-blue-100">
+                      <span className="rounded bg-blue-50 px-2 py-0.5 text-[12px] font-bold text-blue-600 border border-blue-100">
                         Order
                       </span>
                     )}
                     {tx.type === "Donation" && (
-                      <span className="rounded bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600 border border-rose-100">
+                      <span className="rounded bg-rose-50 px-2 py-0.5 text-[12px] font-bold text-rose-600 border border-rose-100">
                         Donation
                       </span>
                     )}
                     {tx.type === "Payout" && (
-                      <span className="rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600 border border-emerald-100">
+                      <span className="rounded bg-emerald-50 px-2 py-0.5 text-[12px] font-bold text-emerald-600 border border-emerald-100">
                         Payout
                       </span>
                     )}
                     {tx.type === "Chargeback" && (
-                      <span className="rounded bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-600 border border-amber-100">
+                      <span className="rounded bg-amber-50 px-2 py-0.5 text-[12px] font-bold text-amber-600 border border-amber-100">
                         Chargeback
                       </span>
                     )}
@@ -247,22 +247,22 @@ export default function TransactionsPage() {
                   {/* Status */}
                   <td className="py-4 pr-4">
                     {tx.status === "Success" && (
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 border border-emerald-100">
+                      <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[12px] font-bold text-emerald-600 border border-emerald-100">
                         Success
                       </span>
                     )}
                     {tx.status === "Pending" && (
-                      <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-600 border border-amber-100">
+                      <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 border border-amber-100">
                         Pending
                       </span>
                     )}
                     {tx.status === "Failed" && (
-                      <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold text-rose-600 border border-rose-100">
+                      <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-[12px] font-bold text-rose-600 border border-rose-100">
                         Failed
                       </span>
                     )}
                     {tx.status === "Disputed" && (
-                      <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-600 border border-amber-100">
+                      <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 border border-amber-100">
                         Disputed
                       </span>
                     )}

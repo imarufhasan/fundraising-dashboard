@@ -99,7 +99,7 @@ export default function SettingsPage() {
           {/* First & Last Name */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">First Name</label>
+              <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">First Name</label>
               <input
                 type="text"
                 required
@@ -109,7 +109,7 @@ export default function SettingsPage() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Last Name</label>
+              <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Last Name</label>
               <input
                 type="text"
                 required
@@ -122,7 +122,7 @@ export default function SettingsPage() {
 
           {/* Email Address */}
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
+            <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
             <input
               type="email"
               required
@@ -134,7 +134,7 @@ export default function SettingsPage() {
 
           {/* Phone Number */}
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</label>
+            <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</label>
             <input
               type="text"
               required
@@ -174,7 +174,7 @@ export default function SettingsPage() {
         <form onSubmit={handleUpdatePassword} className="p-5 space-y-5">
           {/* Current Password */}
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current Password</label>
+            <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Current Password</label>
             <div className="relative">
               <input
                 type={showCurrent ? "text" : "password"}
@@ -195,7 +195,7 @@ export default function SettingsPage() {
 
           {/* New Password */}
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">New Password</label>
+            <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">New Password</label>
             <div className="relative">
               <input
                 type={showNew ? "text" : "password"}
@@ -216,7 +216,7 @@ export default function SettingsPage() {
 
           {/* Confirm New Password */}
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Confirm New Password</label>
+            <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Confirm New Password</label>
             <div className="relative">
               <input
                 type={showConfirm ? "text" : "password"}

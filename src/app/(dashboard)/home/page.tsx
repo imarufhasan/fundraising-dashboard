@@ -156,7 +156,7 @@ export default function Home() {
                 <div>
                   <h3 className="font-bold text-slate-800">Revenue Overview</h3>
                 </div>
-                <div className="flex items-center gap-3 text-[10px] font-semibold">
+                <div className="flex items-center gap-3 text-[12px] font-semibold">
                   <div className="flex items-center gap-1 text-slate-600">
                     <span className="size-2 rounded-full bg-cyan-400" />
                     Revenue Overview
@@ -355,7 +355,7 @@ export default function Home() {
                   <p className="text-sm text-slate-500 italic mt-0.5">“Jenna&apos;s Banana Pudding”</p>
                 </div>
               </div>
-              <span className="text-[10px] font-bold text-slate-400">2 min ago</span>
+              <span className="text-[12px] font-bold text-slate-400">2 min ago</span>
             </div>
 
             {/* Activity 2 */}
@@ -369,7 +369,7 @@ export default function Home() {
                   <p className="text-sm text-slate-500 italic mt-0.5">“Sweet Treats Co.”</p>
                 </div>
               </div>
-              <span className="text-[10px] font-bold text-slate-400">15 min ago</span>
+              <span className="text-[12px] font-bold text-slate-400">15 min ago</span>
             </div>
 
             {/* Activity 3 */}
@@ -383,7 +383,7 @@ export default function Home() {
                   <p className="text-sm text-slate-500 mt-0.5">To: Sweet Treats Co.</p>
                 </div>
               </div>
-              <span className="text-[10px] font-bold text-slate-400">1 hr ago</span>
+              <span className="text-[12px] font-bold text-slate-400">1 hr ago</span>
             </div>
 
             {/* Activity 4 */}
@@ -397,7 +397,7 @@ export default function Home() {
                   <p className="text-sm text-slate-500 italic mt-0.5">“Help Our Team”</p>
                 </div>
               </div>
-              <span className="text-[10px] font-bold text-slate-400">2 hr ago</span>
+              <span className="text-[12px] font-bold text-slate-400">2 hr ago</span>
             </div>
 
             {/* Activity 5 */}
@@ -411,7 +411,7 @@ export default function Home() {
                   <p className="text-sm text-slate-500 mt-0.5">Order not received</p>
                 </div>
               </div>
-              <span className="text-[10px] font-bold text-slate-400">3 hr ago</span>
+              <span className="text-[12px] font-bold text-slate-400">3 hr ago</span>
             </div>
           </div>
         </div>
@@ -450,7 +450,7 @@ export default function Home() {
                     <td className="py-3.5 text-center text-slate-500">125</td>
                     <td className="py-3.5 text-center text-slate-500">189</td>
                     <td className="py-3.5 text-right">
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-600">
+                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[12px] font-bold text-emerald-600">
                         Live
                       </span>
                     </td>
@@ -464,7 +464,7 @@ export default function Home() {
                     <td className="py-3.5 text-center text-slate-500">95</td>
                     <td className="py-3.5 text-center text-slate-500">215</td>
                     <td className="py-3.5 text-right">
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-600">
+                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[12px] font-bold text-emerald-600">
                         Live
                       </span>
                     </td>
@@ -478,7 +478,7 @@ export default function Home() {
                     <td className="py-3.5 text-center text-slate-500">87</td>
                     <td className="py-3.5 text-center text-slate-500">102</td>
                     <td className="py-3.5 text-right">
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-600">
+                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[12px] font-bold text-emerald-600">
                         Live
                       </span>
                     </td>
@@ -492,7 +492,7 @@ export default function Home() {
                     <td className="py-3.5 text-center text-slate-500">160</td>
                     <td className="py-3.5 text-center text-slate-500">300</td>
                     <td className="py-3.5 text-right">
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-600">
+                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[12px] font-bold text-emerald-600">
                         Live
                       </span>
                     </td>
@@ -506,7 +506,7 @@ export default function Home() {
                     <td className="py-3.5 text-center text-slate-500">70</td>
                     <td className="py-3.5 text-center text-slate-500">90</td>
                     <td className="py-3.5 text-right">
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-600">
+                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[12px] font-bold text-emerald-600">
                         Live
                       </span>
                     </td>
@@ -520,7 +520,7 @@ export default function Home() {
                     <td className="py-3.5 text-center text-slate-500">93</td>
                     <td className="py-3.5 text-center text-slate-500">145</td>
                     <td className="py-3.5 text-right">
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-600">
+                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[12px] font-bold text-emerald-600">
                         Live
                       </span>
                     </td>
@@ -552,7 +552,7 @@ export default function Home() {
                     <td className="py-3.5 text-slate-900">Sweet Treats Co.</td>
                     <td className="py-3.5 text-slate-500">Tent, Shirts, Cups, Bags...</td>
                     <td className="py-3.5">
-                      <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">
+                      <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[12px] font-bold text-blue-600">
                         New
                       </span>
                     </td>
@@ -563,7 +563,7 @@ export default function Home() {
                     <td className="py-3.5 text-slate-900">Gourmet Delights</td>
                     <td className="py-3.5 text-slate-500">Plates, Utensils, Napkins</td>
                     <td className="py-3.5">
-                      <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-600">
+                      <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[12px] font-bold text-amber-600">
                         In Design
                       </span>
                     </td>
@@ -574,7 +574,7 @@ export default function Home() {
                     <td className="py-3.5 text-slate-900">Beverage Bliss</td>
                     <td className="py-3.5 text-slate-500">Cups, Straws, Coasters</td>
                     <td className="py-3.5">
-                      <span className="rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-bold text-purple-600">
+                      <span className="rounded-md bg-purple-50 px-2 py-0.5 text-[12px] font-bold text-purple-600">
                         Mockups Sent
                       </span>
                     </td>
@@ -585,7 +585,7 @@ export default function Home() {
                     <td className="py-3.5 text-slate-900">Savory Snacks Inc.</td>
                     <td className="py-3.5 text-slate-500">Boxes, Bags, Labels, Forks...</td>
                     <td className="py-3.5">
-                      <span className="rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600">
+                      <span className="rounded-md bg-rose-50 px-2 py-0.5 text-[12px] font-bold text-rose-600">
                         Quote Sent
                       </span>
                     </td>
@@ -596,7 +596,7 @@ export default function Home() {
                     <td className="py-3.5 text-slate-900">Fresh Bakes Co.</td>
                     <td className="py-3.5 text-slate-500">Pans, Wrappers, Boxes, Bags...</td>
                     <td className="py-3.5">
-                      <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600">
+                      <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[12px] font-bold text-emerald-600">
                         Completed
                       </span>
                     </td>
@@ -719,7 +719,7 @@ export default function Home() {
           <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
             <div className="space-y-0.5">
               <div className="text-base font-extrabold text-slate-900">$17,328.64</div>
-              <div className="text-[10px] font-bold text-slate-400">Platform Balance (Available)</div>
+              <div className="text-[12px] font-bold text-slate-400">Platform Balance (Available)</div>
             </div>
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
               <DollarSign className="size-4" />
@@ -730,7 +730,7 @@ export default function Home() {
           <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
             <div className="space-y-0.5">
               <div className="text-base font-extrabold text-slate-900">$21,436.78</div>
-              <div className="text-[10px] font-bold text-slate-400">Pending Stripe Payouts</div>
+              <div className="text-[12px] font-bold text-slate-400">Pending Stripe Payouts</div>
             </div>
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
               <TrendingUp className="size-4" />
@@ -741,7 +741,7 @@ export default function Home() {
           <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
             <div className="space-y-0.5">
               <div className="text-base font-extrabold text-slate-900">$182,456.21</div>
-              <div className="text-[10px] font-bold text-slate-400">This Month&apos;s Revenue</div>
+              <div className="text-[12px] font-bold text-slate-400">This Month&apos;s Revenue</div>
             </div>
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-cyan-50 text-cyan-600">
               <DollarSign className="size-4" />
@@ -752,7 +752,7 @@ export default function Home() {
           <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
             <div className="space-y-0.5">
               <div className="text-base font-extrabold text-slate-900">$10,947.35</div>
-              <div className="text-[10px] font-bold text-slate-400">This Month&apos;s Fees Earned</div>
+              <div className="text-[12px] font-bold text-slate-400">This Month&apos;s Fees Earned</div>
             </div>
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-purple-50 text-purple-600">
               <Coins className="size-4" />
@@ -763,7 +763,7 @@ export default function Home() {
           <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
             <div className="space-y-0.5">
               <div className="text-base font-extrabold text-slate-900">$325.00</div>
-              <div className="text-[10px] font-bold text-slate-400">Chargebacks (This Month)</div>
+              <div className="text-[12px] font-bold text-slate-400">Chargebacks (This Month)</div>
             </div>
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600">
               <AlertTriangle className="size-4" />

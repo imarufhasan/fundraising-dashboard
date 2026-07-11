@@ -199,7 +199,7 @@ export default function OrganizersPage() {
                   {/* Email & Phone */}
                   <td className="py-4 px-6">
                     <div className="text-slate-900 font-extrabold leading-tight">{org.email}</div>
-                    <div className="text-[10px] text-slate-400 font-semibold mt-0.5">{org.phone}</div>
+                    <div className="text-[12px] text-slate-400 font-semibold mt-0.5">{org.phone}</div>
                   </td>
 
                   {/* Campaigns Count */}
@@ -216,11 +216,11 @@ export default function OrganizersPage() {
                   {/* Status */}
                   <td className="py-4 px-6">
                     {org.status === "Active" ? (
-                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold text-emerald-600 border border-emerald-100">
+                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-[12px] font-bold text-emerald-600 border border-emerald-100">
                         Active
                       </span>
                     ) : (
-                      <span className="rounded-full bg-rose-50 px-3 py-1 text-[10px] font-bold text-rose-600 border border-rose-100">
+                      <span className="rounded-full bg-rose-50 px-3 py-1 text-[12px] font-bold text-rose-600 border border-rose-100">
                         Suspended
                       </span>
                     )}
@@ -280,7 +280,7 @@ export default function OrganizersPage() {
                     {selectedOrganizer.name}
                   </h2>
                   <div className="mt-1 flex items-center gap-2">
-                    <span className="text-[10px] text-slate-400 font-bold">{selectedOrganizer.id}</span>
+                    <span className="text-[12px] text-slate-400 font-bold">{selectedOrganizer.id}</span>
                     {selectedOrganizer.status === "Active" ? (
                       <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600 border border-emerald-100">
                         Active
@@ -309,7 +309,7 @@ export default function OrganizersPage() {
                 <div className="flex items-center gap-3 text-sm font-semibold text-slate-600">
                   <Mail className="size-4 text-slate-400" />
                   <div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Address</div>
+                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Email Address</div>
                     <div className="text-slate-800 font-bold">{selectedOrganizer.email}</div>
                   </div>
                 </div>
@@ -318,7 +318,7 @@ export default function OrganizersPage() {
                 <div className="flex items-center gap-3 text-sm font-semibold text-slate-600">
                   <Phone className="size-4 text-slate-400" />
                   <div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</div>
+                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</div>
                     <div className="text-slate-800 font-bold">{selectedOrganizer.phone}</div>
                   </div>
                 </div>
@@ -327,7 +327,7 @@ export default function OrganizersPage() {
                 <div className="flex items-center gap-3 text-sm font-semibold text-slate-600">
                   <Calendar className="size-4 text-slate-400" />
                   <div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Member Since</div>
+                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Member Since</div>
                     <div className="text-slate-800 font-bold">{selectedOrganizer.joined}</div>
                   </div>
                 </div>
@@ -336,14 +336,14 @@ export default function OrganizersPage() {
               {/* Campaign Performance Box */}
               <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 grid grid-cols-2 gap-4">
                 <div>
-                  <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="flex items-center gap-1 text-[12px] font-bold text-slate-400 uppercase tracking-wider">
                     <Award className="size-3.5 text-slate-500" />
                     Campaigns
                   </div>
                   <div className="mt-1 text-lg font-black text-slate-900">{selectedOrganizer.campaignsCount}</div>
                 </div>
                 <div>
-                  <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="flex items-center gap-1 text-[12px] font-bold text-slate-400 uppercase tracking-wider">
                     <DollarSign className="size-3.5 text-slate-500" />
                     Total Revenue
                   </div>
@@ -413,7 +413,7 @@ export default function OrganizersPage() {
             <form onSubmit={handleAddOrganizer} className="mt-4 space-y-4">
               {/* Name */}
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Full Name</label>
+                <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Full Name</label>
                 <input
                   type="text"
                   required
@@ -426,7 +426,7 @@ export default function OrganizersPage() {
 
               {/* Email */}
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
+                <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
                 <input
                   type="email"
                   required
@@ -439,7 +439,7 @@ export default function OrganizersPage() {
 
               {/* Phone */}
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</label>
+                <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</label>
                 <input
                   type="text"
                   required

@@ -300,7 +300,7 @@ export default function AdminPage() {
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
               {/* Name */}
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Name</label>
+                <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Name</label>
                 <input
                   type="text"
                   required
@@ -313,7 +313,7 @@ export default function AdminPage() {
 
               {/* Email */}
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
+                <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
                 <input
                   type="email"
                   required
@@ -326,7 +326,7 @@ export default function AdminPage() {
 
               {/* Phone */}
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</label>
+                <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</label>
                 <input
                   type="text"
                   required
@@ -339,7 +339,7 @@ export default function AdminPage() {
 
               {/* Image URL */}
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Profile Image URL</label>
+                <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Profile Image URL</label>
                 <input
                   type="text"
                   value={formImageUrl}
