@@ -118,7 +118,7 @@ export default function CampaignsPage() {
             placeholder="Search campaigns..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
           />
         </div>
       </div>
@@ -138,7 +138,7 @@ export default function CampaignsPage() {
                 <th className="py-4 px-6 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+            <tbody className="divide-y divide-slate-100 text-sm font-semibold text-slate-700">
               {filteredCampaigns.map((campaign) => (
                 <tr
                   key={campaign.id}
@@ -249,7 +249,7 @@ export default function CampaignsPage() {
             <div className="flex items-start justify-between pb-4 border-b border-slate-100">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-400">{selectedCampaign.id}</span>
+                  <span className="text-sm font-bold text-slate-400">{selectedCampaign.id}</span>
                   {selectedCampaign.status === "Active" && (
                     <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600 border border-emerald-100">
                       Active
@@ -284,7 +284,7 @@ export default function CampaignsPage() {
               {/* Description */}
               <div>
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Description</h4>
-                <p className="mt-1 text-xs leading-relaxed text-slate-600 font-medium">
+                <p className="mt-1 text-sm leading-relaxed text-slate-600 font-medium">
                   {selectedCampaign.description || "No description provided for this campaign."}
                 </p>
               </div>
@@ -296,7 +296,7 @@ export default function CampaignsPage() {
                     <User className="size-3.5 text-slate-500" />
                     Organizer
                   </div>
-                  <div className="mt-1 text-xs font-bold text-slate-800">{selectedCampaign.organizer}</div>
+                  <div className="mt-1 text-sm font-bold text-slate-800">{selectedCampaign.organizer}</div>
                   {selectedCampaign.email && (
                     <div className="text-[10px] text-slate-500 mt-0.5 truncate">{selectedCampaign.email}</div>
                   )}
@@ -308,13 +308,13 @@ export default function CampaignsPage() {
                     <Calendar className="size-3.5 text-slate-500" />
                     Launch Date
                   </div>
-                  <div className="mt-1 text-xs font-bold text-slate-800">{selectedCampaign.date}</div>
+                  <div className="mt-1 text-sm font-bold text-slate-800">{selectedCampaign.date}</div>
                 </div>
               </div>
 
               {/* Progress & Financials */}
               <div className="rounded-xl bg-slate-50/50 p-4 border border-slate-100 space-y-3">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                <div className="flex items-center justify-between text-sm font-bold text-slate-800">
                   <span>Progress Summary</span>
                   <span>{selectedCampaign.percentage}% achieved</span>
                 </div>
@@ -347,14 +347,14 @@ export default function CampaignsPage() {
               <button
                 type="button"
                 onClick={() => setSelectedCampaign(null)}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition-colors duration-200 hover:bg-slate-50 active:scale-95"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-colors duration-200 hover:bg-slate-50 active:scale-95"
               >
                 Close
               </button>
               {selectedCampaign.status !== "Flagged" && (
                 <button
                   type="button"
-                  className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-rose-600/20 transition-all duration-200 hover:bg-rose-700 active:scale-95"
+                  className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-bold text-white shadow-md shadow-rose-600/20 transition-all duration-200 hover:bg-rose-700 active:scale-95"
                 >
                   Flag Campaign
                 </button>

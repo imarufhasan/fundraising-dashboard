@@ -148,14 +148,14 @@ export default function OrganizersPage() {
               placeholder="Search organizers..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
             />
           </div>
           {/* Add Button */}
           <button
             type="button"
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-indigo-600/20 transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-700 active:scale-[0.98]"
+            className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/20 transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-700 active:scale-[0.98]"
           >
             <UserPlus className="size-4" />
             <span>Add Organizer</span>
@@ -178,7 +178,7 @@ export default function OrganizersPage() {
                 <th className="py-4 px-6 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+            <tbody className="divide-y divide-slate-100 text-sm font-semibold text-slate-700">
               {filteredOrganizers.map((org) => (
                 <tr
                   key={org.id}
@@ -187,7 +187,7 @@ export default function OrganizersPage() {
                   {/* Name with initials avatar */}
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-bold text-indigo-600">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-sm font-bold text-indigo-600">
                         {org.avatarInitials}
                       </div>
                       <div className="font-extrabold text-slate-900 leading-tight">
@@ -306,7 +306,7 @@ export default function OrganizersPage() {
             <div className="mt-5 space-y-4">
               <div className="space-y-3">
                 {/* Email */}
-                <div className="flex items-center gap-3 text-xs font-semibold text-slate-600">
+                <div className="flex items-center gap-3 text-sm font-semibold text-slate-600">
                   <Mail className="size-4 text-slate-400" />
                   <div>
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Address</div>
@@ -315,7 +315,7 @@ export default function OrganizersPage() {
                 </div>
 
                 {/* Phone */}
-                <div className="flex items-center gap-3 text-xs font-semibold text-slate-600">
+                <div className="flex items-center gap-3 text-sm font-semibold text-slate-600">
                   <Phone className="size-4 text-slate-400" />
                   <div>
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</div>
@@ -324,7 +324,7 @@ export default function OrganizersPage() {
                 </div>
 
                 {/* Joined */}
-                <div className="flex items-center gap-3 text-xs font-semibold text-slate-600">
+                <div className="flex items-center gap-3 text-sm font-semibold text-slate-600">
                   <Calendar className="size-4 text-slate-400" />
                   <div>
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Member Since</div>
@@ -359,7 +359,7 @@ export default function OrganizersPage() {
               <button
                 type="button"
                 onClick={() => setSelectedOrganizer(null)}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition-colors duration-200 hover:bg-slate-50 active:scale-95"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-colors duration-200 hover:bg-slate-50 active:scale-95"
               >
                 Close
               </button>
@@ -374,7 +374,7 @@ export default function OrganizersPage() {
                   );
                   setSelectedOrganizer({ ...selectedOrganizer, status: updatedStatus });
                 }}
-                className={`rounded-xl px-4 py-2 text-xs font-bold text-white shadow-md transition-all duration-200 active:scale-95 ${
+                className={`rounded-xl px-4 py-2 text-sm font-bold text-white shadow-md transition-all duration-200 active:scale-95 ${
                   selectedOrganizer.status === "Active"
                     ? "bg-rose-600 shadow-rose-600/20 hover:bg-rose-700"
                     : "bg-emerald-600 shadow-emerald-600/20 hover:bg-emerald-700"
@@ -420,7 +420,7 @@ export default function OrganizersPage() {
                   value={newOrgName}
                   onChange={(e) => setNewOrgName(e.target.value)}
                   placeholder="e.g. John Doe"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
 
@@ -433,7 +433,7 @@ export default function OrganizersPage() {
                   value={newOrgEmail}
                   onChange={(e) => setNewOrgEmail(e.target.value)}
                   placeholder="e.g. john.doe@example.com"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
 
@@ -446,7 +446,7 @@ export default function OrganizersPage() {
                   value={newOrgPhone}
                   onChange={(e) => setNewOrgPhone(e.target.value)}
                   placeholder="e.g. +011 234 5678"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
 
@@ -455,13 +455,13 @@ export default function OrganizersPage() {
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition-colors duration-200 hover:bg-slate-50 active:scale-95"
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-colors duration-200 hover:bg-slate-50 active:scale-95"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-indigo-600/20 transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-700 active:scale-[0.98]"
+                  className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/20 transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-700 active:scale-[0.98]"
                 >
                   Save Organizer
                 </button>

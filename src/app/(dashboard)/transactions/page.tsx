@@ -113,7 +113,7 @@ export default function TransactionsPage() {
         {/* Gross Volume */}
         <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-400">Gross Volume</span>
+            <span className="text-sm font-semibold text-slate-400">Gross Volume</span>
             <div className="text-2xl font-black text-slate-900">$3,670</div>
             <p className="text-[10px] text-slate-500 font-medium">All transactions</p>
           </div>
@@ -125,7 +125,7 @@ export default function TransactionsPage() {
         {/* Platform Fees */}
         <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-400">Platform Fees</span>
+            <span className="text-sm font-semibold text-slate-400">Platform Fees</span>
             <div className="text-2xl font-black text-slate-900">$32.00</div>
             <p className="text-[10px] text-slate-500 font-medium">Earned this period</p>
           </div>
@@ -137,7 +137,7 @@ export default function TransactionsPage() {
         {/* Disputes */}
         <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-400">Disputes</span>
+            <span className="text-sm font-semibold text-slate-400">Disputes</span>
             <div className="text-2xl font-black text-slate-900">1</div>
             <p className="text-[10px] text-slate-500 font-medium">$45 chargeback</p>
           </div>
@@ -157,7 +157,7 @@ export default function TransactionsPage() {
                 key={tab}
                 type="button"
                 onClick={() => setSelectedTypeTab(tab)}
-                className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all duration-200 ${
+                className={`rounded-lg px-4 py-1.5 text-sm font-bold transition-all duration-200 ${
                   selectedTypeTab === tab
                     ? "bg-white text-slate-900 shadow-sm"
                     : "text-slate-500 hover:text-slate-900"
@@ -176,7 +176,7 @@ export default function TransactionsPage() {
               placeholder="Search TXN ID, Organizer..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
             />
           </div>
         </div>
@@ -196,7 +196,7 @@ export default function TransactionsPage() {
                 <th className="pb-3 text-right">Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+            <tbody className="divide-y divide-slate-100 text-sm font-semibold text-slate-700">
               {filteredTransactions.map((tx) => (
                 <tr key={tx.id} className="transition-colors duration-200 hover:bg-slate-50/30">
                   {/* ID */}

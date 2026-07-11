@@ -38,7 +38,7 @@ export default function Home() {
           </div>
           <div>
             <div className="text-xl font-bold text-slate-900">412</div>
-            <div className="text-xs text-slate-500 font-medium">Live Campaigns</div>
+            <div className="text-sm text-slate-500 font-medium">Live Campaigns</div>
           </div>
         </div>
 
@@ -49,7 +49,7 @@ export default function Home() {
           </div>
           <div>
             <div className="text-xl font-bold text-slate-900">287</div>
-            <div className="text-xs text-slate-500 font-medium">Completed Campaigns</div>
+            <div className="text-sm text-slate-500 font-medium">Completed Campaigns</div>
           </div>
         </div>
 
@@ -60,7 +60,7 @@ export default function Home() {
           </div>
           <div>
             <div className="text-xl font-bold text-slate-900">$48,765.32</div>
-            <div className="text-xs text-slate-500 font-medium">Platform Revenue</div>
+            <div className="text-sm text-slate-500 font-medium">Platform Revenue</div>
           </div>
         </div>
 
@@ -71,7 +71,7 @@ export default function Home() {
           </div>
           <div>
             <div className="text-xl font-bold text-slate-900">$12,345.00</div>
-            <div className="text-xs text-slate-500 font-medium">Launch Fee Collected</div>
+            <div className="text-sm text-slate-500 font-medium">Launch Fee Collected</div>
           </div>
         </div>
 
@@ -82,7 +82,7 @@ export default function Home() {
           </div>
           <div>
             <div className="text-xl font-bold text-slate-900">$28,916.22</div>
-            <div className="text-xs text-slate-500 font-medium">Transaction Fees (6%)</div>
+            <div className="text-sm text-slate-500 font-medium">Transaction Fees (6%)</div>
           </div>
         </div>
 
@@ -93,7 +93,7 @@ export default function Home() {
           </div>
           <div>
             <div className="text-xl font-bold text-slate-900">$3,984.03</div>
-            <div className="text-xs text-slate-500 font-medium">Brand Builder Fees</div>
+            <div className="text-sm text-slate-500 font-medium">Brand Builder Fees</div>
           </div>
         </div>
       </div>
@@ -103,7 +103,7 @@ export default function Home() {
         {/* Card 1: Pending Payouts */}
         <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pending Payouts</span>
+            <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Pending Payouts</span>
             <div className="text-2xl font-black text-slate-900">$21,436.78</div>
           </div>
           <div className="flex size-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
@@ -114,7 +114,7 @@ export default function Home() {
         {/* Card 2: Failed payments */}
         <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Failed payments</span>
+            <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Failed payments</span>
             <div className="text-2xl font-black text-slate-900 font-sans">12</div>
           </div>
           <div className="flex size-12 items-center justify-center rounded-full bg-amber-50 text-amber-600">
@@ -125,7 +125,7 @@ export default function Home() {
         {/* Card 3: Live Campaigns */}
         <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Live Campaigns</span>
+            <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Live Campaigns</span>
             <div className="text-2xl font-black text-slate-900">412</div>
           </div>
           <div className="flex size-12 items-center justify-center rounded-full bg-blue-50 text-blue-600">
@@ -136,7 +136,7 @@ export default function Home() {
         {/* Card 4: Launch Fee Collected */}
         <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Launch Fee Collected</span>
+            <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Launch Fee Collected</span>
             <div className="text-2xl font-black text-slate-900">$12,345.00</div>
           </div>
           <div className="flex size-12 items-center justify-center rounded-full bg-violet-50 text-violet-600">
@@ -314,7 +314,7 @@ export default function Home() {
                 </div>
 
                 {/* Legends */}
-                <div className="space-y-2 text-xs font-semibold text-slate-600">
+                <div className="space-y-2 text-sm font-semibold text-slate-600">
                   <div className="flex items-center gap-2">
                     <span className="size-3 shrink-0 rounded bg-[#06b6d4]" />
                     <span>Transaction Fees (6%): <b className="text-slate-800">$28,916.22 (59%)</b></span>
@@ -352,7 +352,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-slate-900">New campaign created</h4>
-                  <p className="text-xs text-slate-500 italic mt-0.5">“Jenna&apos;s Banana Pudding”</p>
+                  <p className="text-sm text-slate-500 italic mt-0.5">“Jenna&apos;s Banana Pudding”</p>
                 </div>
               </div>
               <span className="text-[10px] font-bold text-slate-400">2 min ago</span>
@@ -366,7 +366,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-slate-900">Brand Builder order received</h4>
-                  <p className="text-xs text-slate-500 italic mt-0.5">“Sweet Treats Co.”</p>
+                  <p className="text-sm text-slate-500 italic mt-0.5">“Sweet Treats Co.”</p>
                 </div>
               </div>
               <span className="text-[10px] font-bold text-slate-400">15 min ago</span>
@@ -380,7 +380,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-slate-900">Payout of $2,350.45 approved</h4>
-                  <p className="text-xs text-slate-500 mt-0.5">To: Sweet Treats Co.</p>
+                  <p className="text-sm text-slate-500 mt-0.5">To: Sweet Treats Co.</p>
                 </div>
               </div>
               <span className="text-[10px] font-bold text-slate-400">1 hr ago</span>
@@ -394,7 +394,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-slate-900">Campaign flagged</h4>
-                  <p className="text-xs text-slate-500 italic mt-0.5">“Help Our Team”</p>
+                  <p className="text-sm text-slate-500 italic mt-0.5">“Help Our Team”</p>
                 </div>
               </div>
               <span className="text-[10px] font-bold text-slate-400">2 hr ago</span>
@@ -408,7 +408,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-slate-900">Support ticket received</h4>
-                  <p className="text-xs text-slate-500 mt-0.5">Order not received</p>
+                  <p className="text-sm text-slate-500 mt-0.5">Order not received</p>
                 </div>
               </div>
               <span className="text-[10px] font-bold text-slate-400">3 hr ago</span>
@@ -440,7 +440,7 @@ export default function Home() {
                     <th className="pb-3 text-right">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+                <tbody className="divide-y divide-slate-100 text-sm font-semibold text-slate-700">
                   {/* Row 1 */}
                   <tr>
                     <td className="py-3.5 text-slate-400 pr-2">1</td>
@@ -546,7 +546,7 @@ export default function Home() {
                     <th className="pb-3 text-right">Received</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+                <tbody className="divide-y divide-slate-100 text-sm font-semibold text-slate-700">
                   {/* Row 1 */}
                   <tr>
                     <td className="py-3.5 text-slate-900">Sweet Treats Co.</td>
@@ -663,7 +663,7 @@ export default function Home() {
 
             <div className="space-y-4">
               {/* Row 1 */}
-              <div className="flex items-center justify-between font-semibold text-slate-600 text-xs">
+              <div className="flex items-center justify-between font-semibold text-slate-600 text-sm">
                 <div className="flex items-center gap-2">
                   <Ticket className="size-4 text-slate-400" />
                   <span>Open Tickets</span>
@@ -672,7 +672,7 @@ export default function Home() {
               </div>
 
               {/* Row 2 */}
-              <div className="flex items-center justify-between font-semibold text-slate-600 text-xs">
+              <div className="flex items-center justify-between font-semibold text-slate-600 text-sm">
                 <div className="flex items-center gap-2">
                   <Clock className="size-4 text-slate-400" />
                   <span>Waiting on Customer</span>
@@ -681,7 +681,7 @@ export default function Home() {
               </div>
 
               {/* Row 3 */}
-              <div className="flex items-center justify-between font-semibold text-rose-600 text-xs">
+              <div className="flex items-center justify-between font-semibold text-rose-600 text-sm">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="size-4 text-rose-500" />
                   <span className="font-bold">Urgent/ High Priority</span>
@@ -690,7 +690,7 @@ export default function Home() {
               </div>
 
               {/* Row 4 */}
-              <div className="flex items-center justify-between font-semibold text-slate-600 text-xs">
+              <div className="flex items-center justify-between font-semibold text-slate-600 text-sm">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="size-4 text-slate-400" />
                   <span>Resolved Today</span>
@@ -699,7 +699,7 @@ export default function Home() {
               </div>
 
               {/* Row 5 */}
-              <div className="flex items-center justify-between font-semibold text-slate-600 text-xs">
+              <div className="flex items-center justify-between font-semibold text-slate-600 text-sm">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="size-4 text-slate-400" />
                   <span>All Tickets</span>

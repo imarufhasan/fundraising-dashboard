@@ -55,7 +55,7 @@ export default function SettingsPage() {
       {/* Title Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-900 tracking-tight">Account Settings</h1>
-        <p className="mt-1 text-xs font-semibold text-slate-500">
+        <p className="mt-1 text-sm font-semibold text-slate-500">
           Manage your profile, security, and notification preferences.
         </p>
       </div>
@@ -85,11 +85,11 @@ export default function SettingsPage() {
               </button>
             </div>
             <div>
-              <h4 className="text-xs font-bold text-slate-900">Profile Photo</h4>
+              <h4 className="text-sm font-bold text-slate-900">Profile Photo</h4>
               <button
                 type="button"
                 onClick={triggerImageUpload}
-                className="mt-0.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                className="mt-0.5 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
               >
                 Upload photo
               </button>
@@ -105,7 +105,7 @@ export default function SettingsPage() {
                 required
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               />
             </div>
             <div className="space-y-1">
@@ -115,7 +115,7 @@ export default function SettingsPage() {
                 required
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               />
             </div>
           </div>
@@ -128,7 +128,7 @@ export default function SettingsPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
             />
           </div>
 
@@ -140,21 +140,21 @@ export default function SettingsPage() {
               required
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
             />
           </div>
 
           {/* Footer Save Row */}
           <div className="flex items-center justify-between pt-2 border-t border-slate-50">
             {profileSaved && (
-              <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
+              <span className="flex items-center gap-1 text-sm font-bold text-emerald-600">
                 <CheckCircle className="size-4" />
                 Profile saved successfully!
               </span>
             )}
             <button
               type="submit"
-              className="ml-auto rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-black text-white shadow-md shadow-indigo-600/20 transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-700 active:scale-[0.98]"
+              className="ml-auto rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-black text-white shadow-md shadow-indigo-600/20 transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-700 active:scale-[0.98]"
             >
               Save Changes
             </button>
@@ -181,7 +181,7 @@ export default function SettingsPage() {
                 required
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white pl-3.5 pr-10 py-2 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                className="w-full rounded-xl border border-slate-200 bg-white pl-3.5 pr-10 py-2 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               />
               <button
                 type="button"
@@ -202,7 +202,7 @@ export default function SettingsPage() {
                 required
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white pl-3.5 pr-10 py-2 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                className="w-full rounded-xl border border-slate-200 bg-white pl-3.5 pr-10 py-2 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               />
               <button
                 type="button"
@@ -223,7 +223,7 @@ export default function SettingsPage() {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white pl-3.5 pr-10 py-2 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                className="w-full rounded-xl border border-slate-200 bg-white pl-3.5 pr-10 py-2 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               />
               <button
                 type="button"
@@ -238,14 +238,14 @@ export default function SettingsPage() {
           {/* Footer Save Row */}
           <div className="flex items-center justify-between pt-2 border-t border-slate-50">
             {passwordSaved && (
-              <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
+              <span className="flex items-center gap-1 text-sm font-bold text-emerald-600">
                 <CheckCircle className="size-4" />
                 Password updated successfully!
               </span>
             )}
             <button
               type="submit"
-              className="ml-auto rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-black text-white shadow-md shadow-indigo-600/20 transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-700 active:scale-[0.98]"
+              className="ml-auto rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-black text-white shadow-md shadow-indigo-600/20 transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-700 active:scale-[0.98]"
             >
               Update Password
             </button>

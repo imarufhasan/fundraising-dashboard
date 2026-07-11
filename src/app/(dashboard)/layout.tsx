@@ -38,16 +38,16 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
           <div className="hidden lg:block">
             <h1 className="text-xl font-bold tracking-tight text-slate-950">Dashboard</h1>
-            <p className="mt-1 text-xs text-slate-500">Welcome back, Admin! Here&apos;s what&apos;s happening with FunraisingIt today</p>
+            <p className="mt-1 text-sm text-slate-500">Welcome back, Admin! Here&apos;s what&apos;s happening with FunraisingIt today</p>
           </div>
 
           <div className="flex items-center gap-3 lg:ml-auto">
-            <div className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-orange-300 to-rose-500 text-xs font-bold text-white overflow-hidden">
+            <div className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-orange-300 to-rose-500 text-sm font-bold text-white overflow-hidden">
               <span className="font-bold text-white">A</span>
             </div>
             <div className="hidden text-left sm:block">
               <p className="text-sm font-semibold text-slate-800">Admin</p>
-              <p className="text-xs text-slate-500">Administrator</p>
+              <p className="text-sm text-slate-500">Administrator</p>
             </div>
           </div>
         </header>

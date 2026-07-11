@@ -186,7 +186,7 @@ export default function SupportPage() {
             placeholder="Search tickets..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
           />
         </div>
       </div>
@@ -206,7 +206,7 @@ export default function SupportPage() {
                 <th className="py-4 px-6 text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+            <tbody className="divide-y divide-slate-100 text-sm font-semibold text-slate-700">
               {filteredTickets.map((t) => (
                 <tr
                   key={t.id}
@@ -288,7 +288,7 @@ export default function SupportPage() {
             <div className="flex items-start justify-between pb-4 border-b border-slate-100 shrink-0">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-400">{selectedTicket.id}</span>
+                  <span className="text-sm font-bold text-slate-400">{selectedTicket.id}</span>
                   {selectedTicket.status === "Open" && (
                     <span className="rounded-full bg-rose-50 px-2 py-0.5 text-[9px] font-bold text-rose-600 border border-rose-100">
                       Open
@@ -331,7 +331,7 @@ export default function SupportPage() {
                     className={`flex flex-col ${isAdmin ? "items-end" : "items-start"}`}
                   >
                     <div
-                      className={`max-w-[85%] rounded-2xl p-3 text-xs font-semibold leading-relaxed ${
+                      className={`max-w-[85%] rounded-2xl p-3 text-sm font-semibold leading-relaxed ${
                         isAdmin
                           ? "bg-indigo-600 text-white rounded-tr-none"
                           : "bg-slate-100 text-slate-800 rounded-tl-none"
@@ -357,7 +357,7 @@ export default function SupportPage() {
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
                     placeholder="Type your response here..."
-                    className="flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    className="flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                   />
                   <button
                     type="submit"
@@ -368,7 +368,7 @@ export default function SupportPage() {
                   </button>
                 </form>
               ) : (
-                <div className="text-center py-2 text-xs font-bold text-slate-400 italic">
+                <div className="text-center py-2 text-sm font-bold text-slate-400 italic">
                   This ticket has been resolved. You can reopen it by responding below if needed.
                 </div>
               )}
@@ -379,7 +379,7 @@ export default function SupportPage() {
                   <button
                     type="button"
                     onClick={() => handleResolveTicket(selectedTicket.id)}
-                    className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-600 transition-colors duration-200 hover:bg-emerald-100 active:scale-95"
+                    className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-600 transition-colors duration-200 hover:bg-emerald-100 active:scale-95"
                   >
                     Resolve Ticket
                   </button>
@@ -396,7 +396,7 @@ export default function SupportPage() {
                       setTickets(updated);
                       setSelectedTicket({ ...selectedTicket, status: "Open" });
                     }}
-                    className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-600 transition-colors duration-200 hover:bg-rose-100 active:scale-95"
+                    className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-bold text-rose-600 transition-colors duration-200 hover:bg-rose-100 active:scale-95"
                   >
                     Reopen Ticket
                   </button>
@@ -405,7 +405,7 @@ export default function SupportPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedTicket(null)}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition-colors duration-200 hover:bg-slate-50 active:scale-95"
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-colors duration-200 hover:bg-slate-50 active:scale-95"
                 >
                   Close
                 </button>
