@@ -23,7 +23,7 @@ type SidebarProps = {
 
 const navigationItems = [
   { href: "/home", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/ccampaigns", label: "Campaigns", icon: Flag },
+  { href: "/campaigns", label: "Campaigns", icon: Flag },
   { href: "/organizers", label: "Organizers", icon: UsersRound },
   { href: "/transactions", label: "Transactions", icon: WalletCards },
   { href: "/support", label: "Support", icon: Headphones },
