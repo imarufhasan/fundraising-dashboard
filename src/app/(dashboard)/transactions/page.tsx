@@ -1,121 +1,211 @@
 "use client";
 
-import React, { useState } from "react";
-import { DollarSign, TrendingUp, AlertTriangle, Search, Filter } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  DollarSign,
+  TrendingUp,
+  AlertTriangle,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { Payment, useGetAllPaymentsQuery } from "@/store/api/paymentApi";
 
-// Types
-type Transaction = {
-  id: string;
-  type: "Order" | "Donation" | "Payout" | "Chargeback";
-  organizer: string;
-  amount: number;
-  fee: number;
-  net: number;
-  status: "Success" | "Pending" | "Failed" | "Disputed";
-  date: string;
-};
+const LIMIT = 10;
 
-// Seed transactions matching screenshot exactly
-const initialTransactions: Transaction[] = [
-  {
-    id: "TXN-8821",
-    type: "Order",
-    organizer: "Jennifer Park",
-    amount: 45.0,
-    fee: 1.8,
-    net: 43.2,
-    status: "Success",
-    date: "Jun 23, 9:14am",
-  },
-  {
-    id: "TXN-8820",
-    type: "Donation",
-    organizer: "Eastside Church",
-    amount: 200.0,
-    fee: 8.0,
-    net: 192.0,
-    status: "Success",
-    date: "Jun 23, 8:52am",
-  },
-  {
-    id: "TXN-8819",
-    type: "Order",
-    organizer: "Jennifer Park",
-    amount: 28.0,
-    fee: 1.12,
-    net: 26.88,
-    status: "Pending",
-    date: "Jun 23, 8:30am",
-  },
-  {
-    id: "TXN-8818",
-    type: "Order",
-    organizer: "Mike Torres",
-    amount: 52.0,
-    fee: 2.08,
-    net: 49.92,
-    status: "Failed",
-    date: "Jun 22, 6:44pm",
-  },
-  {
-    id: "TXN-8817",
-    type: "Payout",
-    organizer: "Jennifer Park",
-    amount: 3200.0,
-    fee: 0.0,
-    net: 3200.0,
-    status: "Success",
-    date: "Jun 15, 10:00am",
-  },
-  {
-    id: "TXN-8816",
-    type: "Chargeback",
-    organizer: "Oak Hill HOA",
-    amount: 45.0,
-    fee: 15.0,
-    net: -60.0,
-    status: "Disputed",
-    date: "Jun 18, 2:30pm",
-  },
-  {
-    id: "TXN-8815",
-    type: "Donation",
-    organizer: "Green Roots Org.",
-    amount: 100.0,
-    fee: 4.0,
-    net: 96.0,
-    status: "Success",
-    date: "Jun 17, 11:20am",
-  },
-];
+const TYPE_TABS = [
+  { label: "All", value: undefined },
+  { label: "Order", value: "order" },
+  { label: "Donation", value: "donation" },
+  { label: "Launch Fee", value: "launch_fee" },
+  { label: "Brand Builder", value: "brand_builder" },
+  { label: "Payout", value: "payout" },
+] as const;
+
+// Small debounce hook so we don't refetch on every keystroke
+function useDebouncedValue<T>(value: T, delayMs: number) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delayMs);
+    return () => clearTimeout(timer);
+  }, [value, delayMs]);
+  return debounced;
+}
+
+function formatDate(dateStr?: string | null) {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function TypeBadge({ type }: { type: string }) {
+  const normalized = type.toLowerCase();
+  const map: Record<string, string> = {
+    order: "bg-blue-50 text-blue-600 border-blue-100",
+    donation: "bg-rose-50 text-rose-600 border-rose-100",
+    launch_fee: "bg-amber-50 text-amber-600 border-amber-100",
+    brand_builder: "bg-indigo-50 text-indigo-600 border-indigo-100",
+    payout: "bg-emerald-50 text-emerald-600 border-emerald-100",
+    refund: "bg-slate-100 text-slate-500 border-slate-200",
+  };
+  const classes =
+    map[normalized] ?? "bg-slate-100 text-slate-500 border-slate-200";
+  const label = type
+    .split("_")
+    .map((w) => w[0]?.toUpperCase() + w.slice(1))
+    .join(" ");
+
+  return (
+    <span
+      className={`rounded px-2 py-0.5 text-[12px] font-bold border ${classes}`}
+    >
+      {label}
+    </span>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const normalized = status.toLowerCase();
+
+  if (normalized === "paid" || normalized === "success") {
+    return (
+      <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[12px] font-bold text-emerald-600 border border-emerald-100">
+        {status}
+      </span>
+    );
+  }
+  if (normalized === "pending") {
+    return (
+      <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 border border-amber-100">
+        Pending
+      </span>
+    );
+  }
+  if (normalized === "failed") {
+    return (
+      <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-[12px] font-bold text-rose-600 border border-rose-100">
+        Failed
+      </span>
+    );
+  }
+  if (normalized === "disputed" || normalized === "refunded") {
+    return (
+      <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 border border-amber-100 capitalize">
+        {status}
+      </span>
+    );
+  }
+  return (
+    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[12px] font-bold text-slate-500 border border-slate-200 capitalize">
+      {status}
+    </span>
+  );
+}
+
+function SkeletonRow() {
+  return (
+    <tr className="animate-pulse">
+      <td className="py-4 pr-4">
+        <div className="h-3.5 w-20 rounded bg-slate-100" />
+      </td>
+      <td className="py-4 pr-4">
+        <div className="h-5 w-16 rounded bg-slate-100" />
+      </td>
+      <td className="py-4 pr-4">
+        <div className="h-3.5 w-28 rounded bg-slate-100" />
+      </td>
+      <td className="py-4 pr-4">
+        <div className="h-3.5 w-14 rounded bg-slate-100" />
+      </td>
+      <td className="py-4 pr-4">
+        <div className="h-3.5 w-12 rounded bg-slate-100" />
+      </td>
+      <td className="py-4 pr-4">
+        <div className="h-3.5 w-14 rounded bg-slate-100" />
+      </td>
+      <td className="py-4 pr-4">
+        <div className="h-5 w-16 rounded-full bg-slate-100" />
+      </td>
+      <td className="py-4 flex justify-end">
+        <div className="h-3.5 w-20 rounded bg-slate-100" />
+      </td>
+    </tr>
+  );
+}
 
 export default function TransactionsPage() {
-  const [transactions] = useState<Transaction[]>(initialTransactions);
-  const [selectedTypeTab, setSelectedTypeTab] = useState<"All" | "Order" | "Donation" | "Payout" | "Chargeback">("All");
+  const [page, setPage] = useState(1);
+  const [selectedTypeTab, setSelectedTypeTab] =
+    useState<(typeof TYPE_TABS)[number]["value"]>(undefined);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebouncedValue(searchTerm, 400);
 
-  // Filters logic
-  const filteredTransactions = transactions.filter((t) => {
-    const matchesTab = selectedTypeTab === "All" || t.type === selectedTypeTab;
-    const matchesSearch =
-      t.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.organizer.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesTab && matchesSearch;
+  // useEffect(() => {
+  //   setPage(1);
+  // }, [debouncedSearch, selectedTypeTab]);
+
+  const { data, isLoading, isFetching, isError } = useGetAllPaymentsQuery({
+    page,
+    limit: LIMIT,
+    searchTerm: debouncedSearch,
+    sortBy: "paidAt",
+    sortOrder: "desc",
+    paymentType: selectedTypeTab,
   });
+
+  const payments = data?.data ?? [];
+  const meta = data?.meta;
+  const totalPages = meta?.totalPages ?? 1;
+
+  const isTableLoading = isLoading || isFetching;
+
+  // Summary numbers are computed from the currently loaded page only —
+  // the API doesn't return platform-wide aggregates, so these reflect
+  // what's visible in the table rather than an all-time total.
+  const summary = useMemo(() => {
+    const grossVolume = payments.reduce((sum, p) => sum + p.totalAmount, 0);
+    const platformFees = payments.reduce((sum, p) => sum + p.platformFee, 0);
+    const disputes = payments.filter((p) =>
+      ["disputed", "failed"].includes(p.status.toLowerCase()),
+    );
+    const disputeAmount = disputes.reduce((sum, p) => sum + p.totalAmount, 0);
+    return {
+      grossVolume,
+      platformFees,
+      disputeCount: disputes?.length,
+      disputeAmount,
+    };
+  }, [payments]);
 
   return (
     <div className="space-y-6">
       {/* Title */}
-      <h1 className="text-2xl font-black text-slate-900 tracking-tight">Transactions</h1>
+      <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+        Transactions
+      </h1>
 
       {/* Top 3 Summary Cards */}
       <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
         {/* Gross Volume */}
         <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="space-y-1">
-            <span className="text-sm font-semibold text-slate-400">Gross Volume</span>
-            <div className="text-2xl font-black text-slate-900">$3,670</div>
-            <p className="text-[12px] text-slate-500 font-medium">All transactions</p>
+            <span className="text-sm font-semibold text-slate-400">
+              Gross Volume
+            </span>
+            <div className="text-2xl font-black text-slate-900">
+              {isTableLoading ? (
+                <div className="h-6 w-20 animate-pulse rounded bg-slate-100" />
+              ) : (
+                `$${summary.grossVolume.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              )}
+            </div>
+            <p className="text-[12px] text-slate-500 font-medium">
+              This page&apos;s transactions
+            </p>
           </div>
           <div className="flex size-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
             <DollarSign className="size-5" />
@@ -125,9 +215,19 @@ export default function TransactionsPage() {
         {/* Platform Fees */}
         <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="space-y-1">
-            <span className="text-sm font-semibold text-slate-400">Platform Fees</span>
-            <div className="text-2xl font-black text-slate-900">$32.00</div>
-            <p className="text-[12px] text-slate-500 font-medium">Earned this period</p>
+            <span className="text-sm font-semibold text-slate-400">
+              Platform Fees
+            </span>
+            <div className="text-2xl font-black text-slate-900">
+              {isTableLoading ? (
+                <div className="h-6 w-20 animate-pulse rounded bg-slate-100" />
+              ) : (
+                `$${summary.platformFees.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              )}
+            </div>
+            <p className="text-[12px] text-slate-500 font-medium">
+              Earned this page
+            </p>
           </div>
           <div className="flex size-11 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
             <TrendingUp className="size-5" />
@@ -137,9 +237,21 @@ export default function TransactionsPage() {
         {/* Disputes */}
         <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="space-y-1">
-            <span className="text-sm font-semibold text-slate-400">Disputes</span>
-            <div className="text-2xl font-black text-slate-900">1</div>
-            <p className="text-[12px] text-slate-500 font-medium">$45 chargeback</p>
+            <span className="text-sm font-semibold text-slate-400">
+              Disputes
+            </span>
+            <div className="text-2xl font-black text-slate-900">
+              {isTableLoading ? (
+                <div className="h-6 w-8 animate-pulse rounded bg-slate-100" />
+              ) : (
+                summary.disputeCount
+              )}
+            </div>
+            <p className="text-[12px] text-slate-500 font-medium">
+              {isTableLoading
+                ? "—"
+                : `$${summary.disputeAmount.toFixed(2)} flagged`}
+            </p>
           </div>
           <div className="flex size-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
             <AlertTriangle className="size-5" />
@@ -152,18 +264,18 @@ export default function TransactionsPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4">
           {/* Tabs */}
           <div className="flex flex-wrap gap-1.5 bg-slate-50 p-1 rounded-xl w-fit">
-            {(["All", "Order", "Donation", "Payout", "Chargeback"] as const).map((tab) => (
+            {TYPE_TABS.map((tab) => (
               <button
-                key={tab}
+                key={tab.label}
                 type="button"
-                onClick={() => setSelectedTypeTab(tab)}
+                onClick={() => setSelectedTypeTab(tab.value)}
                 className={`rounded-lg px-4 py-1.5 text-sm font-bold transition-all duration-200 ${
-                  selectedTypeTab === tab
+                  selectedTypeTab === tab.value
                     ? "bg-white text-slate-900 shadow-sm"
                     : "text-slate-500 hover:text-slate-900"
                 }`}
               >
-                {tab}
+                {tab.label}
               </button>
             ))}
           </div>
@@ -173,7 +285,7 @@ export default function TransactionsPage() {
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search TXN ID, Organizer..."
+              placeholder="Search TXN ID, organizer..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
@@ -186,7 +298,7 @@ export default function TransactionsPage() {
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                <th className="pb-3 pr-4">ID</th>
+                <th className="pb-3 pr-4">Transaction</th>
                 <th className="pb-3 pr-4">Type</th>
                 <th className="pb-3 pr-4">Organizer</th>
                 <th className="pb-3 pr-4">Amount</th>
@@ -197,91 +309,216 @@ export default function TransactionsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm font-semibold text-slate-700">
-              {filteredTransactions.map((tx) => (
-                <tr key={tx.id} className="transition-colors duration-200 hover:bg-slate-50/30">
-                  {/* ID */}
-                  <td className="py-4 pr-4 text-slate-500 font-bold">{tx.id}</td>
+              {isTableLoading &&
+                Array.from({ length: LIMIT }).map((_, i) => (
+                  <SkeletonRow key={i} />
+                ))}
 
-                  {/* Type Badge */}
-                  <td className="py-4 pr-4">
-                    {tx.type === "Order" && (
-                      <span className="rounded bg-blue-50 px-2 py-0.5 text-[12px] font-bold text-blue-600 border border-blue-100">
-                        Order
-                      </span>
-                    )}
-                    {tx.type === "Donation" && (
-                      <span className="rounded bg-rose-50 px-2 py-0.5 text-[12px] font-bold text-rose-600 border border-rose-100">
-                        Donation
-                      </span>
-                    )}
-                    {tx.type === "Payout" && (
-                      <span className="rounded bg-emerald-50 px-2 py-0.5 text-[12px] font-bold text-emerald-600 border border-emerald-100">
-                        Payout
-                      </span>
-                    )}
-                    {tx.type === "Chargeback" && (
-                      <span className="rounded bg-amber-50 px-2 py-0.5 text-[12px] font-bold text-amber-600 border border-amber-100">
-                        Chargeback
-                      </span>
-                    )}
-                  </td>
-
-                  {/* Organizer */}
-                  <td className="py-4 pr-4 text-slate-500 font-medium">{tx.organizer}</td>
-
-                  {/* Amount */}
-                  <td className="py-4 pr-4 text-slate-900 font-bold">
-                    ${tx.amount.toFixed(2)}
-                  </td>
-
-                  {/* Fee */}
-                  <td className="py-4 pr-4 text-slate-500 font-medium">
-                    ${tx.fee.toFixed(2)}
-                  </td>
-
-                  {/* Net */}
-                  <td className={`py-4 pr-4 font-black ${tx.net < 0 ? "text-rose-600" : "text-slate-900"}`}>
-                    {tx.net < 0 ? `$-${Math.abs(tx.net).toFixed(2)}` : `$${tx.net.toFixed(2)}`}
-                  </td>
-
-                  {/* Status */}
-                  <td className="py-4 pr-4">
-                    {tx.status === "Success" && (
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[12px] font-bold text-emerald-600 border border-emerald-100">
-                        Success
-                      </span>
-                    )}
-                    {tx.status === "Pending" && (
-                      <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 border border-amber-100">
-                        Pending
-                      </span>
-                    )}
-                    {tx.status === "Failed" && (
-                      <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-[12px] font-bold text-rose-600 border border-rose-100">
-                        Failed
-                      </span>
-                    )}
-                    {tx.status === "Disputed" && (
-                      <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 border border-amber-100">
-                        Disputed
-                      </span>
-                    )}
-                  </td>
-
-                  {/* Date */}
-                  <td className="py-4 text-right text-slate-400 font-medium">{tx.date}</td>
-                </tr>
-              ))}
-              {filteredTransactions.length === 0 && (
+              {isError && !isTableLoading && (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400 font-semibold">
-                    No transactions found.
+                  <td
+                    colSpan={8}
+                    className="py-12 text-center text-rose-500 font-semibold"
+                  >
+                    Couldn&apos;t load transactions. Please try again.
+                  </td>
+                </tr>
+              )}
+
+              {!isTableLoading &&
+                !isError &&
+                payments.map((tx: Payment) => {
+                  const stripeFee = Number(tx.stripeFee ?? 0);
+                  const platformFee = Number(tx.platformFee ?? 0);
+                  const fee = stripeFee + platformFee;
+                  return (
+                    <tr
+                      key={tx._id}
+                      className="transition-colors duration-200 hover:bg-slate-50/30"
+                    >
+                      {/* Transaction ID */}
+                      <td className="py-4 pr-4 text-slate-500 font-bold">
+                        <span title={tx.transactionId || "No transaction ID"}>
+                          {tx.transactionId
+                            ? tx.transactionId.length > 14
+                              ? `${tx.transactionId.slice(0, 14)}…`
+                              : tx.transactionId
+                            : "N/A"}
+                        </span>
+                      </td>
+
+                      {/* Type Badge */}
+                      <td className="py-4 pr-4">
+                        {tx.paymentType ? (
+                          <TypeBadge type={tx.paymentType} />
+                        ) : (
+                          <span className="text-xs font-semibold text-slate-400">
+                            N/A
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Organizer */}
+                      <td className="py-4 pr-4 text-slate-500 font-medium">
+                        {tx.organizerName || "N/A"}
+                      </td>
+
+                      {/* Amount */}
+                      <td className="py-4 pr-4 text-slate-900 font-bold">
+                        {typeof tx.totalAmount === "number"
+                          ? `$${tx.totalAmount.toFixed(2)}`
+                          : "N/A"}
+                      </td>
+
+                      {/* Fee */}
+                      <td className="py-4 pr-4 text-slate-500 font-medium">
+                        ${fee.toFixed(2)}
+                      </td>
+
+                      {/* Net (amount going to the organizer) */}
+                      <td
+                        className={`py-4 pr-4 font-black ${
+                          typeof tx.organizerAmount === "number" &&
+                          tx.organizerAmount < 0
+                            ? "text-rose-600"
+                            : "text-slate-900"
+                        }`}
+                      >
+                        {typeof tx.organizerAmount === "number"
+                          ? `$${tx.organizerAmount.toFixed(2)}`
+                          : "N/A"}
+                      </td>
+
+                      {/* Status */}
+                      <td className="py-4 pr-4">
+                        {tx.status ? (
+                          <StatusBadge status={tx.status} />
+                        ) : (
+                          <span className="text-xs font-semibold text-slate-400">
+                            N/A
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Date */}
+                      <td className="py-4 text-right text-slate-400 font-medium">
+                        {formatDate(tx.paidAt ?? tx.createdAt)}
+                      </td>
+                    </tr>
+                  );
+                })}
+
+              {!isTableLoading && !isError && payments.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="py-16">
+                    <div className="flex flex-col items-center justify-center text-center">
+                      {/* Empty State Icon */}
+                      <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-slate-100">
+                        <Search className="size-5 text-slate-400" />
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="text-sm font-bold text-slate-700">
+                        No transactions found
+                      </h3>
+
+                      {/* Description */}
+                      <p className="mt-1 max-w-sm text-xs font-medium leading-relaxed text-slate-400">
+                        There are no transactions available for the selected
+                        {selectedTypeTab
+                          ? ` ${selectedTypeTab.replace("_", " ")}`
+                          : ""}
+                        {searchTerm ? " matching your search." : " filters."}
+                      </p>
+
+                      {/* Search/filter hint */}
+                      {(searchTerm || selectedTypeTab) && (
+                        <p className="mt-2 text-[11px] font-semibold text-slate-400">
+                          Try changing your search or selecting a different
+                          transaction type.
+                        </p>
+                      )}
+                    </div>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {meta && meta.total > 0 && (
+          <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-[12px] font-bold text-slate-400">
+              Showing{" "}
+              <span className="text-slate-700">
+                {(meta.page - 1) * meta.limit + 1}–
+                {Math.min(meta.page * meta.limit, meta.total)}
+              </span>{" "}
+              of <span className="text-slate-700">{meta.total}</span>{" "}
+              transactions
+              {isFetching && !isTableLoading && (
+                <span className="ml-2 text-slate-400">(updating...)</span>
+              )}
+            </p>
+
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1 || isTableLoading}
+                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-[12px] font-bold text-slate-600 transition-colors duration-200 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronLeft className="size-3.5" />
+                Prev
+              </button>
+
+              <div className="flex items-center gap-1 px-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(
+                    (p) =>
+                      p === 1 || p === totalPages || Math.abs(p - page) <= 1,
+                  )
+                  .reduce<number[]>((acc, p) => {
+                    if (acc?.length && p - acc[acc?.length - 1] > 1)
+                      acc.push(-1);
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((p, idx) =>
+                    p === -1 ? (
+                      <span key={`gap-${idx}`} className="px-1 text-slate-300">
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPage(p)}
+                        className={`min-w-7 rounded-lg px-2 py-1.5 text-[12px] font-bold transition-colors duration-200 ${
+                          p === page
+                            ? "bg-indigo-600 text-white"
+                            : "text-slate-500 hover:bg-slate-50"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ),
+                  )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-[12px] font-bold text-slate-600 transition-colors duration-200 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+                <ChevronRight className="size-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

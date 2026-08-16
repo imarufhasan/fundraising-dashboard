@@ -1,144 +1,200 @@
 "use client";
 
-import React, { useState } from "react";
-import { Eye, Trash2, Search, X, User, Mail, Phone, Calendar, DollarSign, Award, Plus, UserPlus } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import {
+  Eye,
+  Search,
+  X,
+  Mail,
+  Phone,
+  Calendar,
+  DollarSign,
+  Award,
+  ChevronLeft,
+  ChevronRight,
+  ShoppingBag,
+  Users,
+  Loader2,
+} from "lucide-react";
+import { Organizer, useGetAllOrganizersQuery } from "@/store/api/organizerApi";
 
-// Types
-type Organizer = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  campaignsCount: number;
-  totalRevenue: number;
-  joined: string;
-  status: "Active" | "Suspended";
-  avatarInitials: string;
-};
+const LIMIT = 10;
 
-// Seed organizers matching screenshot
-const initialOrganizers: Organizer[] = [
-  {
-    id: "org-1",
-    name: "David Kim",
-    email: "david.kim@example.com",
-    phone: "+011 234 5678 9012",
-    campaignsCount: 5,
-    totalRevenue: 15000,
-    joined: "Feb 2023",
-    status: "Active",
-    avatarInitials: "DK",
-  },
-  {
-    id: "org-2",
-    name: "Michael Chen",
-    email: "michael.chen@example.com",
-    phone: "+011 785 1234 5678",
-    campaignsCount: 3,
-    totalRevenue: 12500,
-    joined: "Jun 2024",
-    status: "Active",
-    avatarInitials: "MC",
-  },
-  {
-    id: "org-3",
-    name: "Emily Davis",
-    email: "emily.davis@example.com",
-    phone: "+011 678 1234 5678",
-    campaignsCount: 4,
-    totalRevenue: 9300,
-    joined: "Nov 2024",
-    status: "Suspended",
-    avatarInitials: "ED",
-  },
-  {
-    id: "org-4",
-    name: "Jennifer Park",
-    email: "jen.park@gmail.com",
-    phone: "+011 985 5948 5299",
-    campaignsCount: 2,
-    totalRevenue: 8240,
-    joined: "Mar 2025",
-    status: "Active",
-    avatarInitials: "JP",
-  },
-  {
-    id: "org-5",
-    name: "Sophia Lee",
-    email: "sophia.lee@example.com",
-    phone: "+011 456 7890 1234",
-    campaignsCount: 1,
-    totalRevenue: 6750,
-    joined: "Jan 2025",
-    status: "Suspended",
-    avatarInitials: "SL",
-  },
-];
+function useDebouncedValue<T>(value: T, delayMs: number) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delayMs);
+    return () => clearTimeout(timer);
+  }, [value, delayMs]);
+  return debounced;
+}
 
-export default function OrganizersPage() {
-  const [organizers, setOrganizers] = useState<Organizer[]>(initialOrganizers);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedOrganizer, setSelectedOrganizer] = useState<Organizer | null>(null);
-  
-  // Add Organizer Modal State
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newOrgName, setNewOrgName] = useState("");
-  const [newOrgEmail, setNewOrgEmail] = useState("");
-  const [newOrgPhone, setNewOrgPhone] = useState("");
+function formatDate(dateStr?: string | null) {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+}
 
-  // Search Filter
-  const filteredOrganizers = organizers.filter(
-    (o) =>
-      o.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      o.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Delete Action
-  const handleDelete = (id: string, name: string) => {
-    if (confirm(`Are you sure you want to delete organizer "${name}"?`)) {
-      setOrganizers(organizers.filter((o) => o.id !== id));
-      if (selectedOrganizer?.id === id) {
-        setSelectedOrganizer(null);
-      }
-    }
-  };
-
-  // Add Action
-  const handleAddOrganizer = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newOrgName || !newOrgEmail || !newOrgPhone) return;
-
-    const initials = newOrgName
+function getInitials(name: string) {
+  return (
+    name
       .split(" ")
+      .filter(Boolean)
       .map((n) => n[0])
       .join("")
       .toUpperCase()
-      .substring(0, 2);
+      .substring(0, 2) || "UN"
+  );
+}
 
-    const newOrg: Organizer = {
-      id: `org-${Date.now()}`,
-      name: newOrgName,
-      email: newOrgEmail,
-      phone: newOrgPhone,
-      campaignsCount: 0,
-      totalRevenue: 0,
-      joined: new Date().toLocaleString("default", { month: "short", year: "numeric" }),
-      status: "Active",
-      avatarInitials: initials || "UN",
-    };
+function StatusBadge({ status }: { status: string }) {
+  const normalized = status.toLowerCase();
 
-    setOrganizers([newOrg, ...organizers]);
-    setNewOrgName("");
-    setNewOrgEmail("");
-    setNewOrgPhone("");
-    setIsAddModalOpen(false);
-  };
+  if (normalized === "active") {
+    return (
+      <span className="rounded-full bg-emerald-50 px-3 py-1 text-[12px] font-bold text-emerald-600 border border-emerald-100">
+        Active
+      </span>
+    );
+  }
+  if (normalized === "pending") {
+    return (
+      <span className="rounded-full bg-amber-50 px-3 py-1 text-[12px] font-bold text-amber-600 border border-amber-100">
+        Pending
+      </span>
+    );
+  }
+  if (normalized === "suspended" || normalized === "rejected") {
+    return (
+      <span className="rounded-full bg-rose-50 px-3 py-1 text-[12px] font-bold text-rose-600 border border-rose-100 capitalize">
+        {status}
+      </span>
+    );
+  }
+  return (
+    <span className="rounded-full bg-slate-100 px-3 py-1 text-[12px] font-bold text-slate-500 border border-slate-200 capitalize">
+      {status}
+    </span>
+  );
+}
+
+function Avatar({
+  organizer,
+  size = "size-9",
+}: {
+  organizer: Organizer;
+  size?: string;
+}) {
+  const imageSrc = organizer.profileImage ?? undefined;
+
+  const [imageLoading, setImageLoading] = useState(Boolean(imageSrc));
+  const [imageError, setImageError] = useState(false);
+
+  const showImage = Boolean(imageSrc) && !imageError;
+
+  if (!showImage) {
+    return (
+      <div
+        className={`flex ${size} shrink-0 items-center justify-center rounded-full bg-indigo-50 text-sm font-bold text-indigo-600`}
+      >
+        {getInitials(organizer.name)}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`relative ${size} shrink-0 overflow-hidden rounded-full bg-slate-100`}
+    >
+      {imageLoading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-100">
+          <Loader2 className="size-4 animate-spin text-slate-400" />
+        </div>
+      )}
+
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={imageSrc}
+        alt={organizer.name}
+        className={`h-full w-full object-cover transition-opacity duration-200 ${
+          imageLoading ? "opacity-0" : "opacity-100"
+        }`}
+        onLoad={() => setImageLoading(false)}
+        onError={() => {
+          setImageLoading(false);
+          setImageError(true);
+        }}
+      />
+    </div>
+  );
+}
+
+// Skeleton row that matches the table's column layout
+function SkeletonRow() {
+  return (
+    <tr className="animate-pulse">
+      <td className="py-4 px-6">
+        <div className="flex items-center gap-3">
+          <div className="size-9 shrink-0 rounded-full bg-slate-100" />
+          <div className="h-3.5 w-28 rounded bg-slate-100" />
+        </div>
+      </td>
+      <td className="py-4 px-6">
+        <div className="h-3.5 w-36 rounded bg-slate-100" />
+        <div className="mt-2 h-3 w-24 rounded bg-slate-100" />
+      </td>
+      <td className="py-4 px-6">
+        <div className="h-3.5 w-6 rounded bg-slate-100" />
+      </td>
+      <td className="py-4 px-6">
+        <div className="h-3.5 w-16 rounded bg-slate-100" />
+      </td>
+      <td className="py-4 px-6">
+        <div className="h-3.5 w-16 rounded bg-slate-100" />
+      </td>
+      <td className="py-4 px-6">
+        <div className="h-5 w-16 rounded-full bg-slate-100" />
+      </td>
+      <td className="py-4 px-6">
+        <div className="mx-auto h-6 w-16 rounded bg-slate-100" />
+      </td>
+    </tr>
+  );
+}
+
+export default function OrganizersPage() {
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebouncedValue(searchTerm, 400);
+
+  const { data, isLoading, isFetching, isError } = useGetAllOrganizersQuery({
+    page,
+    limit: LIMIT,
+    searchTerm: debouncedSearch,
+  });
+
+  const organizers = data?.data ?? [];
+  const meta = data?.meta;
+  const totalPages = meta?.totalPages ?? 1;
+
+  const isTableLoading = isLoading || isFetching;
+
+  const [selectedOrganizer, setSelectedOrganizer] = useState<Organizer | null>(
+    null,
+  );
+
+  const handleViewDetails = (organizer: Organizer) =>
+    setSelectedOrganizer(organizer);
 
   return (
     <div className="space-y-6">
       {/* Title & Actions Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Organizers</h1>
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          Organizers
+        </h1>
         <div className="flex items-center gap-3">
           {/* Search */}
           <div className="relative w-full sm:w-64">
@@ -152,14 +208,13 @@ export default function OrganizersPage() {
             />
           </div>
           {/* Add Button */}
-          <button
+          {/* <button
             type="button"
-            onClick={() => setIsAddModalOpen(true)}
             className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/20 transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-700 active:scale-[0.98]"
           >
             <UserPlus className="size-4" />
             <span>Add Organizer</span>
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -179,79 +234,99 @@ export default function OrganizersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm font-semibold text-slate-700">
-              {filteredOrganizers.map((org) => (
-                <tr
-                  key={org.id}
-                  className="transition-colors duration-200 hover:bg-slate-50/30"
-                >
-                  {/* Name with initials avatar */}
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-sm font-bold text-indigo-600">
-                        {org.avatarInitials}
-                      </div>
-                      <div className="font-extrabold text-slate-900 leading-tight">
-                        {org.name}
-                      </div>
-                    </div>
-                  </td>
+              {isTableLoading &&
+                Array.from({ length: LIMIT }).map((_, i) => (
+                  <SkeletonRow key={`skeleton-${i}`} />
+                ))}
 
-                  {/* Email & Phone */}
-                  <td className="py-4 px-6">
-                    <div className="text-slate-900 font-extrabold leading-tight">{org.email}</div>
-                    <div className="text-[12px] text-slate-400 font-semibold mt-0.5">{org.phone}</div>
-                  </td>
-
-                  {/* Campaigns Count */}
-                  <td className="py-4 px-6 font-bold text-slate-800">{org.campaignsCount}</td>
-
-                  {/* Total Revenue */}
-                  <td className="py-4 px-6 font-bold text-slate-900">
-                    ${org.totalRevenue.toLocaleString()}
-                  </td>
-
-                  {/* Joined Date */}
-                  <td className="py-4 px-6 text-slate-500 font-medium">{org.joined}</td>
-
-                  {/* Status */}
-                  <td className="py-4 px-6">
-                    {org.status === "Active" ? (
-                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-[12px] font-bold text-emerald-600 border border-emerald-100">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-rose-50 px-3 py-1 text-[12px] font-bold text-rose-600 border border-rose-100">
-                        Suspended
-                      </span>
-                    )}
-                  </td>
-
-                  {/* Actions */}
-                  <td className="py-4 px-6">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedOrganizer(org)}
-                        className="rounded-lg p-2 text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-indigo-600 active:scale-95"
-                        title="View Details"
-                      >
-                        <Eye className="size-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(org.id, org.name)}
-                        className="rounded-lg p-2 text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-rose-600 active:scale-95"
-                        title="Delete Organizer"
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
-                    </div>
+              {isError && !isLoading && (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="py-16 text-center text-rose-500 font-semibold"
+                  >
+                    Couldn&apos;t load organizers. Please try again.
                   </td>
                 </tr>
-              ))}
-              {filteredOrganizers.length === 0 && (
+              )}
+
+              {!isTableLoading &&
+                !isError &&
+                organizers.map((org) => (
+                  <tr
+                    key={org.userId}
+                    className="transition-colors duration-200 hover:bg-slate-50/30"
+                  >
+                    {/* Name with avatar */}
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-3">
+                        <Avatar organizer={org} />
+                        <div className="font-extrabold text-slate-900 leading-tight">
+                          {org.name}
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Email & Phone */}
+                    <td className="py-4 px-6">
+                      <div className="text-slate-900 font-extrabold leading-tight">
+                        {org.email}
+                      </div>
+                      <div className="text-[12px] text-slate-400 font-semibold mt-0.5">
+                        {org.phoneNumber ?? "—"}
+                      </div>
+                    </td>
+
+                    {/* Campaigns Count */}
+                    <td className="py-4 px-6 font-bold text-slate-800">
+                      {org.totalCampaign}
+                    </td>
+
+                    {/* Total Revenue */}
+                    <td className="py-4 px-6 font-bold text-slate-900">
+                      ${org.totalRevenue.toLocaleString()}
+                    </td>
+
+                    {/* Joined Date */}
+                    <td className="py-4 px-6 text-slate-500 font-medium">
+                      {formatDate(org.joinedAt)}
+                    </td>
+
+                    {/* Status */}
+                    <td className="py-4 px-6">
+                      <StatusBadge status={org.status} />
+                    </td>
+
+                    {/* Actions */}
+                    <td className="py-4 px-6">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleViewDetails(org)}
+                          className="rounded-lg p-2 text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-indigo-600 active:scale-95"
+                          title="View Details"
+                        >
+                          <Eye className="size-4" />
+                        </button>
+                        {/* <button
+                          type="button"
+                          onClick={() => handleDelete(org)}
+                          className="rounded-lg p-2 text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-rose-600 active:scale-95"
+                          title="Delete Organizer"
+                        >
+                          <Trash2 className="size-4" />
+                        </button> */}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+
+              {!isTableLoading && !isError && organizers.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400 font-semibold">
+                  <td
+                    colSpan={7}
+                    className="py-12 text-center text-slate-400 font-semibold"
+                  >
                     No organizers found.
                   </td>
                 </tr>
@@ -259,6 +334,78 @@ export default function OrganizersPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {meta && meta.total > 0 && (
+          <div className="flex flex-col gap-3 border-t border-slate-100 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-[12px] font-bold text-slate-400">
+              Showing{" "}
+              <span className="text-slate-700">
+                {(meta.page - 1) * meta.limit + 1}–
+                {Math.min(meta.page * meta.limit, meta.total)}
+              </span>{" "}
+              of <span className="text-slate-700">{meta.total}</span> organizers
+              {isFetching && !isLoading && (
+                <span className="ml-2 text-slate-400">(updating...)</span>
+              )}
+            </p>
+
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-[12px] font-bold text-slate-600 transition-colors duration-200 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronLeft className="size-3.5" />
+                Prev
+              </button>
+
+              <div className="flex items-center gap-1 px-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(
+                    (p) =>
+                      p === 1 || p === totalPages || Math.abs(p - page) <= 1,
+                  )
+                  .reduce<number[]>((acc, p) => {
+                    if (acc.length && p - acc[acc.length - 1] > 1) acc.push(-1);
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((p, idx) =>
+                    p === -1 ? (
+                      <span key={`gap-${idx}`} className="px-1 text-slate-300">
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPage(p)}
+                        className={`min-w-7 rounded-lg px-2 py-1.5 text-[12px] font-bold transition-colors duration-200 ${
+                          p === page
+                            ? "bg-indigo-600 text-white"
+                            : "text-slate-500 hover:bg-slate-50"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ),
+                  )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-[12px] font-bold text-slate-600 transition-colors duration-200 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+                <ChevronRight className="size-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Organizer Details Modal */}
@@ -268,28 +415,20 @@ export default function OrganizersPage() {
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300"
             onClick={() => setSelectedOrganizer(null)}
           />
-          <div className="relative w-full max-w-md scale-100 rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl transition-all duration-300 animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-md scale-100 rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl transition-all duration-300 animate-in fade-in zoom-in-95 max-h-[85vh] overflow-y-auto">
             {/* Header */}
             <div className="flex items-start justify-between pb-4 border-b border-slate-100">
               <div className="flex items-center gap-3">
-                <div className="flex size-11 items-center justify-center rounded-full bg-indigo-50 text-sm font-bold text-indigo-600">
-                  {selectedOrganizer.avatarInitials}
-                </div>
+                <Avatar organizer={selectedOrganizer} size="size-11" />
                 <div>
                   <h2 className="text-base font-black text-slate-950 leading-tight">
                     {selectedOrganizer.name}
                   </h2>
                   <div className="mt-1 flex items-center gap-2">
-                    <span className="text-[12px] text-slate-400 font-bold">{selectedOrganizer.id}</span>
-                    {selectedOrganizer.status === "Active" ? (
-                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600 border border-emerald-100">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-rose-50 px-2 py-0.5 text-[9px] font-bold text-rose-600 border border-rose-100">
-                        Suspended
-                      </span>
-                    )}
+                    <span className="text-[12px] text-slate-400 font-bold capitalize">
+                      {selectedOrganizer.role}
+                    </span>
+                    <StatusBadge status={selectedOrganizer.status} />
                   </div>
                 </div>
               </div>
@@ -309,8 +448,12 @@ export default function OrganizersPage() {
                 <div className="flex items-center gap-3 text-sm font-semibold text-slate-600">
                   <Mail className="size-4 text-slate-400" />
                   <div>
-                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Email Address</div>
-                    <div className="text-slate-800 font-bold">{selectedOrganizer.email}</div>
+                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">
+                      Email Address
+                    </div>
+                    <div className="text-slate-800 font-bold">
+                      {selectedOrganizer.email}
+                    </div>
                   </div>
                 </div>
 
@@ -318,8 +461,12 @@ export default function OrganizersPage() {
                 <div className="flex items-center gap-3 text-sm font-semibold text-slate-600">
                   <Phone className="size-4 text-slate-400" />
                   <div>
-                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</div>
-                    <div className="text-slate-800 font-bold">{selectedOrganizer.phone}</div>
+                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">
+                      Phone Number
+                    </div>
+                    <div className="text-slate-800 font-bold">
+                      {selectedOrganizer.phoneNumber ?? "—"}
+                    </div>
                   </div>
                 </div>
 
@@ -327,20 +474,26 @@ export default function OrganizersPage() {
                 <div className="flex items-center gap-3 text-sm font-semibold text-slate-600">
                   <Calendar className="size-4 text-slate-400" />
                   <div>
-                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Member Since</div>
-                    <div className="text-slate-800 font-bold">{selectedOrganizer.joined}</div>
+                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">
+                      Member Since
+                    </div>
+                    <div className="text-slate-800 font-bold">
+                      {formatDate(selectedOrganizer.joinedAt)}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Campaign Performance Box */}
+              {/* Campaign / Revenue Stats */}
               <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 grid grid-cols-2 gap-4">
                 <div>
                   <div className="flex items-center gap-1 text-[12px] font-bold text-slate-400 uppercase tracking-wider">
                     <Award className="size-3.5 text-slate-500" />
                     Campaigns
                   </div>
-                  <div className="mt-1 text-lg font-black text-slate-900">{selectedOrganizer.campaignsCount}</div>
+                  <div className="mt-1 text-lg font-black text-slate-900">
+                    {selectedOrganizer.totalCampaign}
+                  </div>
                 </div>
                 <div>
                   <div className="flex items-center gap-1 text-[12px] font-bold text-slate-400 uppercase tracking-wider">
@@ -349,6 +502,52 @@ export default function OrganizersPage() {
                   </div>
                   <div className="mt-1 text-lg font-black text-emerald-600">
                     ${selectedOrganizer.totalRevenue.toLocaleString()}
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center gap-1 text-[12px] font-bold text-slate-400 uppercase tracking-wider">
+                    <Users className="size-3.5 text-slate-500" />
+                    Supporters
+                  </div>
+                  <div className="mt-1 text-lg font-black text-slate-900">
+                    {selectedOrganizer.supporters}
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center gap-1 text-[12px] font-bold text-slate-400 uppercase tracking-wider">
+                    <ShoppingBag className="size-3.5 text-slate-500" />
+                    Orders
+                  </div>
+                  <div className="mt-1 text-lg font-black text-slate-900">
+                    {selectedOrganizer.totalOrders}
+                  </div>
+                </div>
+              </div>
+
+              {/* Campaign breakdown */}
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="rounded-xl border border-slate-100 bg-white p-2.5">
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Active
+                  </div>
+                  <div className="mt-0.5 text-sm font-black text-emerald-600">
+                    {selectedOrganizer.totalActiveCampaign}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-slate-100 bg-white p-2.5">
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Cancelled
+                  </div>
+                  <div className="mt-0.5 text-sm font-black text-slate-500">
+                    {selectedOrganizer.cancelledCampaign}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-slate-100 bg-white p-2.5">
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Rejected
+                  </div>
+                  <div className="mt-0.5 text-sm font-black text-rose-500">
+                    {selectedOrganizer.rejectedCampaign}
                   </div>
                 </div>
               </div>
@@ -365,108 +564,17 @@ export default function OrganizersPage() {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  const updatedStatus = selectedOrganizer.status === "Active" ? "Suspended" : "Active";
-                  setOrganizers(
-                    organizers.map((o) =>
-                      o.id === selectedOrganizer.id ? { ...o, status: updatedStatus } : o
-                    )
-                  );
-                  setSelectedOrganizer({ ...selectedOrganizer, status: updatedStatus });
-                }}
                 className={`rounded-xl px-4 py-2 text-sm font-bold text-white shadow-md transition-all duration-200 active:scale-95 ${
-                  selectedOrganizer.status === "Active"
+                  selectedOrganizer.status === "active"
                     ? "bg-rose-600 shadow-rose-600/20 hover:bg-rose-700"
                     : "bg-emerald-600 shadow-emerald-600/20 hover:bg-emerald-700"
                 }`}
               >
-                {selectedOrganizer.status === "Active" ? "Suspend Account" : "Activate Account"}
+                {selectedOrganizer.status === "active"
+                  ? "Suspend Account"
+                  : "Activate Account"}
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Organizer Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300"
-            onClick={() => setIsAddModalOpen(false)}
-          />
-          <div className="relative w-full max-w-md scale-100 rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl transition-all duration-300 animate-in fade-in zoom-in-95 duration-200">
-            {/* Header */}
-            <div className="flex items-start justify-between pb-4 border-b border-slate-100">
-              <h2 className="text-base font-black text-slate-950 leading-tight">
-                Add New Organizer
-              </h2>
-              <button
-                type="button"
-                onClick={() => setIsAddModalOpen(false)}
-                className="rounded-full p-2 text-slate-400 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-700 active:scale-95"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleAddOrganizer} className="mt-4 space-y-4">
-              {/* Name */}
-              <div className="space-y-1">
-                <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Full Name</label>
-                <input
-                  type="text"
-                  required
-                  value={newOrgName}
-                  onChange={(e) => setNewOrgName(e.target.value)}
-                  placeholder="e.g. John Doe"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                />
-              </div>
-
-              {/* Email */}
-              <div className="space-y-1">
-                <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
-                <input
-                  type="email"
-                  required
-                  value={newOrgEmail}
-                  onChange={(e) => setNewOrgEmail(e.target.value)}
-                  placeholder="e.g. john.doe@example.com"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                />
-              </div>
-
-              {/* Phone */}
-              <div className="space-y-1">
-                <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</label>
-                <input
-                  type="text"
-                  required
-                  value={newOrgPhone}
-                  onChange={(e) => setNewOrgPhone(e.target.value)}
-                  placeholder="e.g. +011 234 5678"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                />
-              </div>
-
-              {/* Footer Actions */}
-              <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-colors duration-200 hover:bg-slate-50 active:scale-95"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/20 transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-700 active:scale-[0.98]"
-                >
-                  Save Organizer
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}

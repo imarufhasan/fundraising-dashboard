@@ -2,15 +2,13 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import StoreProvider from "@/store/StoreProvider";
-
-
+import { ToastProvider } from "@/components/ToastProvider";
 
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
-
 
 export const metadata: Metadata = {
   title: "FunRaising Dashboard",
@@ -23,16 +21,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={` ${poppins.variable} h-full antialiased`}
-    >
+    <html lang="en" className={` ${poppins.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-
         <StoreProvider>
-          {children}
+          <ToastProvider>{children}</ToastProvider>
         </StoreProvider>
-
       </body>
     </html>
   );

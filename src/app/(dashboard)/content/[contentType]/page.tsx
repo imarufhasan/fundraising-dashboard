@@ -18,7 +18,7 @@ import {
   ContentType,
   getContentLabel,
   isValidContentType,
-} from "../../../../../lib/constants/content-types";
+} from "../../../../lib/constants/content-types";
 
 import {
   useGetContentQuery,
@@ -317,10 +317,10 @@ function ContentEditorForm({
               }}
               spellCheck={false}
               placeholder="Write or paste HTML content here..."
-              className="h-[480px] w-full resize-y rounded-xl border border-slate-200 bg-slate-50/60 p-4 font-mono text-[13px] leading-6 text-slate-700 outline-none transition-colors focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500"
+              className="h-120 w-full resize-y rounded-xl border border-slate-200 bg-slate-50/60 p-4 font-mono text-[13px] leading-6 text-slate-700 outline-none transition-colors focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500"
             />
           ) : (
-            <div className="min-h-[480px] rounded-xl border border-slate-200 bg-white p-6">
+            <div className="min-h-120 rounded-xl border border-slate-200 bg-white p-6">
               {draft.trim() ? (
                 <div
                   className="prose-legal space-y-4 text-sm leading-6 text-slate-600 sm:text-[15px] sm:leading-7 [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-slate-900 [&_h2]:mt-6 [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-slate-800 [&_li]:mt-1 [&_ul]:list-disc [&_ul]:pl-5 [&_strong]:text-slate-700"
@@ -425,7 +425,7 @@ function EditorSkeleton() {
     <div className="animate-pulse p-6">
       <div className="h-4 w-40 rounded bg-slate-100" />
 
-      <div className="mt-5 h-[420px] w-full rounded-xl bg-slate-50" />
+      <div className="mt-5 h-105 w-full rounded-xl bg-slate-50" />
     </div>
   );
 }

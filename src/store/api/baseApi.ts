@@ -19,13 +19,11 @@ export const baseApi = createApi({
         }
       }
 
-      headers.set("Content-Type", "application/json");
-
       return headers;
     },
   }),
 
-  tagTypes: ["Auth", "User", "Content"],
+  tagTypes: ["Auth", "User", "Content", "Admin"],
 
   endpoints: () => ({}),
 });

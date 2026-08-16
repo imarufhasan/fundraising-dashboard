@@ -43,7 +43,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </div>
 
           <div className="flex items-center gap-3 lg:ml-auto">
-            <div className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-orange-300 to-rose-500 text-sm font-bold text-white overflow-hidden">
+            <div className="flex size-9 items-center justify-center rounded-full bg-linear-to-br from-orange-300 to-rose-500 text-sm font-bold text-white overflow-hidden">
               <span className="font-bold text-white">A</span>
             </div>
             <Link href="/settings">
