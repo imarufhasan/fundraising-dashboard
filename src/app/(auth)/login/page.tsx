@@ -11,7 +11,7 @@ import { useLoginMutation } from "@/store/api/authApi";
 export default function LoginPage() {
   const router = useRouter();
 
-  const [email, setEmail] = useState("mostafizurrahaman0401@gmail.com");
+  const [email, setEmail] = useState("dev.mostafiz04@gmail.com");
   const [password, setPassword] = useState("test123@PASS");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberPassword, setRememberPassword] = useState(false);

@@ -1,35 +1,31 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-console.log(
-    "API URL:",
-    process.env.NEXT_PUBLIC_API_URL
-);
+console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
 
 export const baseApi = createApi({
-    reducerPath: "api",
+  reducerPath: "api",
 
-    baseQuery: fetchBaseQuery({
-        baseUrl: process.env.NEXT_PUBLIC_API_URL,
-        prepareHeaders: (headers) => {
+  baseQuery: fetchBaseQuery({
+    baseUrl: process.env.NEXT_PUBLIC_API_URL,
 
-            
-            if (typeof window !== "undefined") {
-                const token =
-                    localStorage.getItem("token") ||
-                    sessionStorage.getItem("token");
+    prepareHeaders: (headers) => {
+      if (typeof window !== "undefined") {
+        const token =
+          localStorage.getItem("token") ||
+          sessionStorage.getItem("token");
 
-                if (token) {
-                    headers.set("Authorization", `Bearer ${token}`);
-                }
-            }
+        if (token) {
+          headers.set("Authorization", `Bearer ${token}`);
+        }
+      }
 
-            headers.set("Content-Type", "application/json");
+      headers.set("Content-Type", "application/json");
 
-            return headers;
-        },
-    }),
+      return headers;
+    },
+  }),
 
-    tagTypes: ["Auth", "User", "Content"],
+  tagTypes: ["Auth", "User", "Content"],
 
-    endpoints: () => ({}),
+  endpoints: () => ({}),
 });
