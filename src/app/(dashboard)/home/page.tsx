@@ -1,20 +1,32 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Coins,
   DollarSign,
+  Loader2,
+  Mail,
   Percent,
   Rocket,
+  Search,
+  Store,
   TrendingUp,
   Users,
 } from "lucide-react";
 
-import { useGetDashboardAnalyticsQuery } from "@/store/api/dashboardApi";
+import {
+  useGetDashboardAnalyticsQuery,
+  useGetNewsletterSubscribersQuery,
+} from "@/store/api/dashboardApi";
+import Image from "next/image";
 
 const CIRCUMFERENCE = 2 * Math.PI * 54;
+const NEWSLETTER_PREVIEW_LIMIT = 5;
+const CAMPAIGNS_PAGE_SIZE = 5;
 
 function formatCurrency(value: number) {
   return `$${value.toLocaleString(undefined, {
@@ -39,17 +51,55 @@ function formatDateShort(dateStr: string) {
 function capitalize(text: string) {
   return text
     .split("_")
-    .map((word) =>
-      word ? word.charAt(0).toUpperCase() + word.slice(1) : word,
-    )
+    .map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1) : word))
     .join(" ");
 }
 
 export default function Home() {
-  const { data, isLoading, isError, refetch } =
-    useGetDashboardAnalyticsQuery();
+  const { data, isLoading, isError, refetch } = useGetDashboardAnalyticsQuery();
+
+  // Small preview fetch just for the subscriber count + a handful of recent
+  // emails; the full searchable/paginated list lives on the /newsletter page.
+  const { data: newsletterData } = useGetNewsletterSubscribersQuery({
+    page: 1,
+    limit: NEWSLETTER_PREVIEW_LIMIT,
+  });
 
   const analytics = data?.data;
+  const newsletterMeta = newsletterData?.meta;
+  const newsletterPreview = newsletterData?.data ?? [];
+
+  const [campaignSearch, setCampaignSearch] = useState("");
+  const [campaignPage, setCampaignPage] = useState(1);
+
+  const filteredCampaigns = useMemo(() => {
+    const list = analytics?.topCampaigns ?? [];
+    const term = campaignSearch.trim().toLowerCase();
+
+    if (!term) return list;
+
+    return list.filter(
+      (campaign) =>
+        campaign.name.toLowerCase().includes(term) ||
+        campaign.organizerName.toLowerCase().includes(term) ||
+        campaign.campaignStatus.toLowerCase().includes(term),
+    );
+  }, [analytics, campaignSearch]);
+
+  const campaignTotalPages = Math.max(
+    1,
+    Math.ceil(filteredCampaigns.length / CAMPAIGNS_PAGE_SIZE),
+  );
+
+  const paginatedCampaigns = useMemo(() => {
+    const start = (campaignPage - 1) * CAMPAIGNS_PAGE_SIZE;
+    return filteredCampaigns.slice(start, start + CAMPAIGNS_PAGE_SIZE);
+  }, [filteredCampaigns, campaignPage]);
+
+  const handleCampaignSearchChange = (value: string) => {
+    setCampaignSearch(value);
+    setCampaignPage(1);
+  };
 
   const donutSegments = useMemo(() => {
     if (!analytics) return [];
@@ -83,8 +133,7 @@ export default function Home() {
       0,
     );
 
-    const otherRevenue =
-      analytics.totalPlatformRevenue - accountedRevenue;
+    const otherRevenue = analytics.totalPlatformRevenue - accountedRevenue;
 
     if (otherRevenue > 0.01) {
       const otherPercentage =
@@ -104,8 +153,7 @@ export default function Home() {
     let cumulative = 0;
 
     return segments.map((segment) => {
-      const length =
-        CIRCUMFERENCE * (Math.max(segment.percentage, 0) / 100);
+      const length = CIRCUMFERENCE * (Math.max(segment.percentage, 0) / 100);
 
       const rotateDeg = cumulative * 3.6;
 
@@ -140,9 +188,7 @@ export default function Home() {
         .map((value, index) => {
           const { x, y } = toXY(value, index);
 
-          return `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(
-            2,
-          )}`;
+          return `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`;
         })
         .join(" ");
 
@@ -172,9 +218,7 @@ export default function Home() {
       yAxisLabels: [1, 0.75, 0.5, 0.25, 0].map((factor) =>
         formatCurrency(maxValue * factor),
       ),
-      xAxisLabels: points.map((point) =>
-        formatDateShort(point.date),
-      ),
+      xAxisLabels: points.map((point) => formatDateShort(point.date)),
     };
   }, [analytics]);
 
@@ -184,7 +228,7 @@ export default function Home() {
 
   if (isError || !analytics) {
     return (
-      <div className="flex min-h-100 w-full flex-col items-center justify-center rounded-2xl border border-slate-100 bg-white px-6 py-20 text-center shadow-sm">
+      <div className="flex min-h-100 w-full flex-col items-center justify-center rounded-2xl border border-slate-100 bg-white px-6 py-16 text-center shadow-sm sm:py-20">
         <div className="flex size-12 items-center justify-center rounded-full bg-rose-50 text-rose-600">
           <AlertTriangle className="size-5" />
         </div>
@@ -208,12 +252,14 @@ export default function Home() {
     );
   }
 
+  const recentBrandBuilders = analytics?.recentBrandBuilders ?? [];
+
   return (
-    <main className="w-full max-w-none space-y-6 pb-8 sm:space-y-8 sm:pb-12">
+    <main className="w-full max-w-none space-y-5 pb-8 sm:space-y-8 sm:pb-12">
       {/* =========================
           TOP METRICS
       ========================== */}
-      <section className="grid w-full grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+      <section className="grid w-full grid-cols-2 gap-2.5 xs:gap-3 md:grid-cols-3 xl:grid-cols-6">
         <MetricCard
           icon={<TrendingUp className="size-5" />}
           iconClass="bg-indigo-50 text-indigo-600"
@@ -260,7 +306,7 @@ export default function Home() {
       {/* =========================
           SECONDARY METRICS
       ========================== */}
-      <section className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <section className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <SecondaryMetricCard
           label="Failed Payments"
           value={analytics.totalFailedPayments.toLocaleString()}
@@ -281,6 +327,13 @@ export default function Home() {
           icon={<Rocket className="size-6" />}
           iconClass="bg-violet-50 text-violet-600"
         />
+
+        <SecondaryMetricCard
+          label="Newsletter Subscribers"
+          value={(newsletterMeta?.total ?? 0).toLocaleString()}
+          icon={<Mail className="size-6" />}
+          iconClass="bg-pink-50 text-pink-600"
+        />
       </section>
 
       {/* =========================
@@ -290,9 +343,7 @@ export default function Home() {
         {/* Revenue Overview */}
         <div className="w-full rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
           <div className="mb-5 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
-            <h3 className="font-bold text-slate-800">
-              Revenue Overview
-            </h3>
+            <h3 className="font-bold text-slate-800">Revenue Overview</h3>
 
             <div className="flex flex-wrap items-center gap-3 text-xs font-semibold">
               <div className="flex items-center gap-1.5 text-slate-600">
@@ -309,7 +360,7 @@ export default function Home() {
 
           {chart ? (
             <>
-              <div className="relative h-48 w-full">
+              <div className="relative h-44 w-full sm:h-48">
                 <svg
                   className="size-full overflow-visible"
                   viewBox="0 0 100 100"
@@ -328,11 +379,7 @@ export default function Home() {
                         stopColor="#22d3ee"
                         stopOpacity="0.15"
                       />
-                      <stop
-                        offset="100%"
-                        stopColor="#22d3ee"
-                        stopOpacity="0"
-                      />
+                      <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
                     </linearGradient>
 
                     <linearGradient
@@ -342,16 +389,8 @@ export default function Home() {
                       x2="0"
                       y2="1"
                     >
-                      <stop
-                        offset="0%"
-                        stopColor="#a855f7"
-                        stopOpacity="0.1"
-                      />
-                      <stop
-                        offset="100%"
-                        stopColor="#a855f7"
-                        stopOpacity="0"
-                      />
+                      <stop offset="0%" stopColor="#a855f7" stopOpacity="0.1" />
+                      <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
                     </linearGradient>
                   </defs>
 
@@ -367,10 +406,7 @@ export default function Home() {
                     />
                   ))}
 
-                  <path
-                    d={chart.revenueArea}
-                    fill="url(#revenueGradient)"
-                  />
+                  <path d={chart.revenueArea} fill="url(#revenueGradient)" />
 
                   <path
                     d={chart.revenueLine}
@@ -380,10 +416,7 @@ export default function Home() {
                     strokeLinecap="round"
                   />
 
-                  <path
-                    d={chart.feeArea}
-                    fill="url(#feeGradient)"
-                  />
+                  <path d={chart.feeArea} fill="url(#feeGradient)" />
 
                   <path
                     d={chart.feeLine}
@@ -419,14 +452,16 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="mt-2 flex justify-between gap-2 overflow-hidden pl-8 text-[9px] font-bold text-slate-400">
+              <div className="mt-2 flex justify-between gap-1 overflow-hidden pl-7 text-[8px] font-bold text-slate-400 sm:gap-2 sm:pl-8 sm:text-[9px]">
                 {chart.xAxisLabels.map((label, index) => (
-                  <span key={index}>{label}</span>
+                  <span key={index} className="truncate">
+                    {label}
+                  </span>
                 ))}
               </div>
             </>
           ) : (
-            <div className="flex h-48 items-center justify-center text-sm font-semibold text-slate-400">
+            <div className="flex h-44 items-center justify-center text-sm font-semibold text-slate-400 sm:h-48">
               No revenue data for this period yet.
             </div>
           )}
@@ -438,12 +473,9 @@ export default function Home() {
             Platform Revenue Breakdown
           </h3>
 
-          <div className="flex h-full flex-col items-center justify-center gap-8 lg:flex-row">
-            <div className="relative flex size-36 shrink-0 items-center justify-center">
-              <svg
-                className="size-full -rotate-90"
-                viewBox="0 0 144 144"
-              >
+          <div className="flex pb-4 h-full flex-col items-center justify-center gap-6 sm:gap-8 lg:flex-row">
+            <div className="relative flex size-32 shrink-0 items-center justify-center sm:size-36">
+              <svg className="size-full -rotate-90" viewBox="0 0 144 144">
                 <circle
                   cx="72"
                   cy="72"
@@ -499,13 +531,25 @@ export default function Home() {
           TOP CAMPAIGNS
       ========================== */}
       <section className="w-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
-        <div className="mb-5">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h3 className="font-bold text-slate-800">
             Top Campaigns by Amount Raised
           </h3>
+
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search campaigns..."
+              value={campaignSearch}
+              onChange={(e) => handleCampaignSearchChange(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
         </div>
 
-        <div className="w-full overflow-x-auto">
+        {/* Desktop / tablet table */}
+        <div className="hidden w-full overflow-x-auto sm:block">
           <table className="w-full min-w-190 border-collapse text-left">
             <thead>
               <tr className="border-b border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-400">
@@ -520,10 +564,12 @@ export default function Home() {
             </thead>
 
             <tbody className="divide-y divide-slate-100 text-sm font-semibold text-slate-700">
-              {analytics.topCampaigns.map((campaign, index) => (
+              {paginatedCampaigns.map((campaign, index) => (
                 <CampaignRow
                   key={campaign.campaignId}
-                  rank={String(index + 1)}
+                  rank={String(
+                    (campaignPage - 1) * CAMPAIGNS_PAGE_SIZE + index + 1,
+                  )}
                   campaign={campaign.name}
                   organizer={campaign.organizerName}
                   raised={formatCurrency(campaign.raisedAmount)}
@@ -533,20 +579,179 @@ export default function Home() {
                 />
               ))}
 
-              {!analytics.topCampaigns.length && (
+              {!paginatedCampaigns.length && (
                 <tr>
-                  <td
-                    colSpan={7}
-                    className="py-10 text-center text-slate-400"
-                  >
-                    No campaigns yet.
+                  <td colSpan={7} className="py-10 text-center text-slate-400">
+                    No campaigns found.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Mobile card list */}
+        <div className="space-y-3 sm:hidden">
+          {paginatedCampaigns.map((campaign, index) => (
+            <CampaignCard
+              key={campaign.campaignId}
+              rank={(campaignPage - 1) * CAMPAIGNS_PAGE_SIZE + index + 1}
+              campaign={campaign.name}
+              organizer={campaign.organizerName}
+              raised={formatCurrency(campaign.raisedAmount)}
+              orders={campaign.totalOrders}
+              donors={campaign.totalDonations}
+              status={capitalize(campaign.campaignStatus)}
+            />
+          ))}
+
+          {!paginatedCampaigns.length && (
+            <div className="py-10 text-center text-sm font-semibold text-slate-400">
+              No campaigns found.
+            </div>
+          )}
+        </div>
+
+        {/* Pagination */}
+        {filteredCampaigns.length > CAMPAIGNS_PAGE_SIZE && (
+          <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+            <span className="text-xs font-semibold text-slate-400">
+              Page {campaignPage} of {campaignTotalPages} •{" "}
+              {filteredCampaigns.length} campaigns
+            </span>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={campaignPage <= 1}
+                onClick={() => setCampaignPage((p) => Math.max(1, p - 1))}
+                className="flex size-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+
+              <button
+                type="button"
+                disabled={campaignPage >= campaignTotalPages}
+                onClick={() =>
+                  setCampaignPage((p) => Math.min(campaignTotalPages, p + 1))
+                }
+                className="flex size-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </section>
+
+      {/* =========================
+          RECENT BRAND BUILDERS
+      ========================== */}
+      <section className="w-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
+        <div className="mb-5">
+          <h3 className="font-bold text-slate-800">Recent Brand Builders</h3>
+          <p className="mt-0.5 text-xs font-medium text-slate-400">
+            Latest merchandise brands created by organizers.
+          </p>
+        </div>
+
+        {recentBrandBuilders.length ? (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {recentBrandBuilders.map((brand) => (
+              <div
+                key={brand.brandId}
+                className="flex items-center gap-3 rounded-xl border border-slate-100 p-3.5 transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <div className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                  {brand.brandLogo ? (
+                    <BrandLogoImage
+                      src={brand.brandLogo}
+                      alt={brand.businessName || "Brand"}
+                    />
+                  ) : (
+                    <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-400">
+                      N/A
+                    </div>
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-sm font-bold text-slate-800">
+                      {brand.businessName}
+                    </span>
+
+                    <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600">
+                      {capitalize(brand.status)}
+                    </span>
+                  </div>
+
+                  <div className="mt-0.5 flex items-center gap-1 truncate text-xs font-medium text-slate-500">
+                    <Store className="size-3 shrink-0" />
+                    {brand.sellingItem}
+                  </div>
+
+                  <div className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
+                    by {brand.organizerName}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-10 text-center text-sm font-semibold text-slate-400">
+            No brand builders yet.
+          </div>
+        )}
+      </section>
+
+      {/* =========================
+          NEWSLETTER SUBSCRIBERS (PREVIEW)
+      ========================== */}
+      {/* <section className="w-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
+        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="font-bold text-slate-800">Newsletter Subscribers</h3>
+
+            <p className="mt-0.5 text-xs font-medium text-slate-400">
+              {newsletterMeta
+                ? `${newsletterMeta.total.toLocaleString()} total subscriber${
+                    newsletterMeta.total === 1 ? "" : "s"
+                  }`
+                : "Loading subscriber count…"}
+            </p>
+          </div>
+
+          <Link
+            href="/newsletter"
+            className="inline-flex items-center gap-1.5 self-start rounded-full bg-pink-50 px-3.5 py-1.5 text-xs font-bold text-pink-600 transition hover:bg-pink-100 sm:self-auto"
+          >
+            <Mail className="size-3.5" />
+            View All & Search
+          </Link>
+        </div>
+
+        <div className="space-y-2.5">
+          {newsletterPreview.map((subscriber) => (
+            <div
+              key={subscriber._id}
+              className="flex items-center gap-2.5 rounded-xl border border-slate-100 px-3.5 py-2.5"
+            >
+              <Mail className="size-4 shrink-0 text-pink-500" />
+              <span className="truncate text-sm font-semibold text-slate-700">
+                {subscriber.email}
+              </span>
+            </div>
+          ))}
+
+          {!newsletterPreview.length && (
+            <div className="py-8 text-center text-sm font-semibold text-slate-400">
+              No subscribers yet.
+            </div>
+          )}
+        </div>
+      </section> */}
     </main>
   );
 }
@@ -562,26 +767,21 @@ type MetricCardProps = {
   label: string;
 };
 
-function MetricCard({
-  icon,
-  iconClass,
-  value,
-  label,
-}: MetricCardProps) {
+function MetricCard({ icon, iconClass, value, label }: MetricCardProps) {
   return (
-    <div className="flex w-full min-w-0 items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3.5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-4">
+    <div className="flex w-full min-w-0 items-center gap-2.5 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:gap-3 sm:p-4">
       <div
-        className={`flex size-11 shrink-0 items-center justify-center rounded-2xl ${iconClass}`}
+        className={`flex size-10 shrink-0 items-center justify-center rounded-2xl sm:size-11 ${iconClass}`}
       >
         {icon}
       </div>
 
       <div className="min-w-0">
-        <div className="truncate text-lg font-bold text-slate-900 sm:text-xl">
+        <div className="truncate text-base font-bold text-slate-900 sm:text-lg lg:text-xl">
           {value}
         </div>
 
-        <div className="truncate text-xs font-medium text-slate-500 sm:text-sm">
+        <div className="truncate text-[11px] font-medium text-slate-500 sm:text-xs lg:text-sm">
           {label}
         </div>
       </div>
@@ -609,7 +809,7 @@ function SecondaryMetricCard({
           {label}
         </span>
 
-        <div className="mt-1 truncate text-xl font-black text-slate-900 sm:text-2xl">
+        <div className="mt-1 truncate text-lg font-black text-slate-900 sm:text-xl lg:text-2xl">
           {value}
         </div>
       </div>
@@ -629,20 +829,13 @@ type RevenueLegendProps = {
   value: string;
 };
 
-function RevenueLegend({
-  color,
-  label,
-  value,
-}: RevenueLegendProps) {
+function RevenueLegend({ color, label, value }: RevenueLegendProps) {
   return (
     <div className="flex items-start gap-3 text-sm font-semibold text-slate-600">
-      <span
-        className={`mt-1.5 size-3 shrink-0 rounded-full ${color}`}
-      />
+      <span className={`mt-1.5 size-3 shrink-0 rounded-full ${color}`} />
 
       <span className="min-w-0">
-        {label}:{" "}
-        <strong className="text-slate-800">{value}</strong>
+        {label}: <strong className="text-slate-800">{value}</strong>
       </span>
     </div>
   );
@@ -676,8 +869,7 @@ function CampaignRow({
   status,
 }: CampaignRowProps) {
   const statusClass =
-    CAMPAIGN_STATUS_CLASS[status] ??
-    "bg-slate-100 text-slate-500";
+    CAMPAIGN_STATUS_CLASS[status] ?? "bg-slate-100 text-slate-500";
 
   return (
     <tr>
@@ -689,13 +881,9 @@ function CampaignRow({
 
       <td className="py-4 font-bold text-slate-900">{raised}</td>
 
-      <td className="py-4 text-center text-slate-500">
-        {orders}
-      </td>
+      <td className="py-4 text-center text-slate-500">{orders}</td>
 
-      <td className="py-4 text-center text-slate-500">
-        {donors}
-      </td>
+      <td className="py-4 text-center text-slate-500">{donors}</td>
 
       <td className="py-4 text-right">
         <span
@@ -708,19 +896,78 @@ function CampaignRow({
   );
 }
 
+type CampaignCardProps = {
+  rank: number;
+  campaign: string;
+  organizer: string;
+  raised: string;
+  orders: number;
+  donors: number;
+  status: string;
+};
+
+function CampaignCard({
+  rank,
+  campaign,
+  organizer,
+  raised,
+  orders,
+  donors,
+  status,
+}: CampaignCardProps) {
+  const statusClass =
+    CAMPAIGN_STATUS_CLASS[status] ?? "bg-slate-100 text-slate-500";
+
+  return (
+    <div className="rounded-xl border border-slate-100 p-3.5">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 items-start gap-2.5">
+          <span className="mt-0.5 text-xs font-bold text-slate-400">
+            #{rank}
+          </span>
+
+          <div className="min-w-0">
+            <div className="truncate text-sm font-bold text-slate-800">
+              {campaign}
+            </div>
+
+            <div className="truncate text-xs font-medium text-slate-400">
+              {organizer}
+            </div>
+          </div>
+        </div>
+
+        <span
+          className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${statusClass}`}
+        >
+          {status}
+        </span>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-xs font-semibold text-slate-500">
+        <span className="text-sm font-black text-slate-900">{raised}</span>
+
+        <span>{orders} orders</span>
+
+        <span>{donors} donors</span>
+      </div>
+    </div>
+  );
+}
+
 function HomeSkeleton() {
   return (
-    <main className="w-full max-w-none space-y-6 pb-8 sm:space-y-8">
+    <main className="w-full max-w-none space-y-5 pb-8 sm:space-y-8">
       {/* Metrics */}
-      <div className="grid w-full grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid w-full grid-cols-2 gap-2.5 xs:gap-3 md:grid-cols-3 xl:grid-cols-6">
         {Array.from({ length: 6 }).map((_, index) => (
           <SkeletonMetric key={index} />
         ))}
       </div>
 
       {/* Secondary metrics */}
-      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, index) => (
+      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={index}
             className="flex h-24 w-full items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
@@ -753,10 +1000,42 @@ function HomeSkeleton() {
             >
               <div className="h-4 w-5 animate-pulse rounded bg-slate-100" />
               <div className="h-4 flex-1 animate-pulse rounded bg-slate-100" />
-              <div className="h-4 w-28 animate-pulse rounded bg-slate-100" />
-              <div className="h-4 w-20 animate-pulse rounded bg-slate-100" />
+              <div className="hidden h-4 w-28 animate-pulse rounded bg-slate-100 sm:block" />
+              <div className="hidden h-4 w-20 animate-pulse rounded bg-slate-100 sm:block" />
               <div className="h-6 w-16 animate-pulse rounded-full bg-slate-100" />
             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Brand builders */}
+      <div className="w-full rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
+        <div className="mb-5 h-5 w-48 animate-pulse rounded bg-slate-100" />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-3 rounded-xl border border-slate-100 p-3.5"
+            >
+              <div className="size-14 shrink-0 animate-pulse rounded-xl bg-slate-100" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-2/3 animate-pulse rounded bg-slate-100" />
+                <div className="h-3 w-1/2 animate-pulse rounded bg-slate-100" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Newsletter */}
+      <div className="w-full rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
+        <div className="mb-5 h-5 w-56 animate-pulse rounded bg-slate-100" />
+        <div className="space-y-2.5">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-11 animate-pulse rounded-xl bg-slate-100"
+            />
           ))}
         </div>
       </div>
@@ -810,6 +1089,32 @@ function SkeletonBreakdown() {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function BrandLogoImage({ src, alt }: { src: string; alt: string }) {
+  const [isLoading, setIsLoading] = useState(true);
+
+  return (
+    <div className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+      {isLoading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-100">
+          <Loader2 className="size-4 animate-spin text-slate-400" />
+        </div>
+      )}
+
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes="56px"
+        className={`object-contain p-1 transition-opacity duration-200 ${
+          isLoading ? "opacity-0" : "opacity-100"
+        }`}
+        onLoad={() => setIsLoading(false)}
+        onError={() => setIsLoading(false)}
+      />
     </div>
   );
 }

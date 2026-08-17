@@ -72,6 +72,33 @@ export type GetDashboardAnalyticsResponse = {
   data: DashboardAnalytics;
 };
 
+export interface NewsletterSubscriber {
+  _id: string;
+  email: string;
+  subscribedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NewsletterMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface NewsletterListResponse {
+  success: boolean;
+  message: string;
+  meta: NewsletterMeta;
+  data: NewsletterSubscriber[];
+}
+
+export interface NewsletterQueryArgs {
+  page?: number;
+  limit?: number;
+}
+
 export const dashboardApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getDashboardAnalytics: builder.query<GetDashboardAnalyticsResponse, void>({
@@ -79,7 +106,21 @@ export const dashboardApi = baseApi.injectEndpoints({
         url: "/analytics/admin",
       }),
     }),
+
+    getNewsletterSubscribers: builder.query<
+      NewsletterListResponse,
+      NewsletterQueryArgs | void
+    >({
+      query: (args) => ({
+        url: "/newsletter/all",
+        params: {
+          page: args?.page ?? 1,
+          limit: args?.limit ?? 10,
+        },
+      }),
+      providesTags: ["Newsletter"],
+    }),
   }),
 });
 
-export const { useGetDashboardAnalyticsQuery } = dashboardApi;
+export const { useGetDashboardAnalyticsQuery, useGetNewsletterSubscribersQuery } = dashboardApi;

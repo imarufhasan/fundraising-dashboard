@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Loader2,
   LogOut,
+  Mail,
   Settings,
   UsersRound,
   WalletCards,
@@ -37,6 +38,7 @@ const navigationItems = [
   { href: "/organizers", label: "Organizers", icon: UsersRound },
   { href: "/transactions", label: "Transactions", icon: WalletCards },
   { href: "/support", label: "Support", icon: Headphones },
+  { href: "/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin", label: "Admin", icon: UsersRound },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -197,9 +199,7 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
             <div
               id="content-navigation"
               className={`grid transition-[grid-template-rows] duration-200 ease-out ${
-                isContentOpen
-                  ? "grid-rows-[1fr]"
-                  : "grid-rows-[0fr]"
+                isContentOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
               }`}
             >
               <div className="overflow-hidden">

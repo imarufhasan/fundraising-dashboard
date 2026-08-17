@@ -25,6 +25,12 @@ import {
   useSaveContentMutation,
 } from "@/store/api/contentApi";
 
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import LinkExtension from "@tiptap/extension-link";
+import RichTextEditor from "@/components/RichTextEditor";
+
 type Tab = "write" | "preview";
 
 export default function ContentEditorPage() {
@@ -120,10 +126,6 @@ function ContentEditor({ contentType }: { contentType: ContentType }) {
     />
   );
 }
-
-/* ================================================== */
-/* Content Editor Form */
-/* ================================================== */
 
 function ContentEditorForm({
   contentType,
@@ -308,22 +310,89 @@ function ContentEditorForm({
         {/* Editor */}
         <div className="p-4 sm:p-6">
           {tab === "write" ? (
-            <textarea
+            <RichTextEditor
               value={draft}
-              onChange={(event) => {
-                setDraft(event.target.value);
+              onChange={(value) => {
+                setDraft(value);
                 setSaveError("");
                 setShowSuccess(false);
               }}
-              spellCheck={false}
-              placeholder="Write or paste HTML content here..."
-              className="h-120 w-full resize-y rounded-xl border border-slate-200 bg-slate-50/60 p-4 font-mono text-[13px] leading-6 text-slate-700 outline-none transition-colors focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500"
             />
           ) : (
             <div className="min-h-120 rounded-xl border border-slate-200 bg-white p-6">
               {draft.trim() ? (
                 <div
-                  className="prose-legal space-y-4 text-sm leading-6 text-slate-600 sm:text-[15px] sm:leading-7 [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-slate-900 [&_h2]:mt-6 [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-slate-800 [&_li]:mt-1 [&_ul]:list-disc [&_ul]:pl-5 [&_strong]:text-slate-700"
+                  className="
+    prose-legal
+    max-w-none
+    text-sm
+    leading-7
+    text-slate-600
+    sm:text-[15px]
+
+    [&_h1]:mb-4
+    [&_h1]:text-2xl
+    [&_h1]:font-bold
+    [&_h1]:text-slate-900
+
+    [&_h2]:mb-3
+    [&_h2]:mt-7
+    [&_h2]:text-xl
+    [&_h2]:font-bold
+    [&_h2]:text-slate-900
+
+    [&_h3]:mb-2
+    [&_h3]:mt-5
+    [&_h3]:text-lg
+    [&_h3]:font-bold
+    [&_h3]:text-slate-800
+
+    [&_p]:mb-4
+
+    [&_ul]:mb-4
+    [&_ul]:list-disc
+    [&_ul]:pl-6
+
+    [&_ol]:mb-4
+    [&_ol]:list-decimal
+    [&_ol]:pl-6
+
+    [&_li]:mt-1
+
+    [&_strong]:font-bold
+    [&_strong]:text-slate-800
+
+    [&_a]:font-semibold
+    [&_a]:text-indigo-600
+    [&_a]:underline
+
+    [&_blockquote]:my-5
+    [&_blockquote]:border-l-4
+    [&_blockquote]:border-indigo-300
+    [&_blockquote]:bg-indigo-50
+    [&_blockquote]:px-4
+    [&_blockquote]:py-3
+    [&_blockquote]:italic
+    [&_blockquote]:text-slate-600
+
+    [&_pre]:my-5
+    [&_pre]:overflow-x-auto
+    [&_pre]:rounded-xl
+    [&_pre]:bg-slate-900
+    [&_pre]:p-4
+    [&_pre]:text-sm
+    [&_pre]:text-slate-100
+
+    [&_code]:rounded
+    [&_code]:bg-slate-100
+    [&_code]:px-1
+    [&_code]:py-0.5
+    [&_code]:text-sm
+    [&_code]:text-pink-600
+
+    [&_hr]:my-6
+    [&_hr]:border-slate-200
+  "
                   dangerouslySetInnerHTML={{
                     __html: draft,
                   }}
@@ -455,4 +524,40 @@ function InvalidContentType({ slug }: { slug: string }) {
       </Link>
     </div>
   );
+}
+
+function EditorToolbarButton({
+  active,
+  onClick,
+  label,
+  title,
+  className = "",
+  disabled = false,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  title: string;
+  className?: string;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      disabled={disabled}
+      onClick={onClick}
+      className={`flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-xs font-bold transition-colors ${
+        active
+          ? "bg-indigo-100 text-indigo-700"
+          : "text-slate-600 hover:bg-white hover:text-indigo-600"
+      } disabled:cursor-not-allowed disabled:opacity-30 ${className}`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function ToolbarDivider() {
+  return <div className="mx-1 h-5 w-px bg-slate-200" />;
 }
