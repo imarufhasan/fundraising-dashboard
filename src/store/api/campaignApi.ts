@@ -11,7 +11,12 @@ export type CampaignSupporter = {
   updatedAt: string;
 };
 
-export type CampaignStatus = "draft" | "active" | "completed" | "cancelled" | string;
+export type CampaignStatus =
+  | "draft"
+  | "active"
+  | "completed"
+  | "cancelled"
+  | string;
 export type CampaignPaymentStatus = "not_initiated" | "paid" | string;
 
 export type Campaign = {
@@ -65,6 +70,7 @@ export type Campaign = {
   organizerAmount: number;
   organizerAmountWithoutShipping: number;
   supporters?: CampaignSupporter[];
+  rejectedReason?: string | null; // 👈 add this line
 };
 
 // ---------- Detail-only types ----------
@@ -126,9 +132,29 @@ export type GetCampaignByIdResponse = {
   data: CampaignDetail;
 };
 
+export type EarlyCompleteCampaignResponse = {
+  success: boolean;
+  message: string;
+  errorSources?: { path: string; message: string }[];
+};
+
+export type RejectCampaignResponse = {
+  success: boolean;
+  message: string;
+  errorSources?: { path: string; message: string }[];
+};
+
+export type RejectCampaignPayload = {
+  id: string;
+  rejectedReason: string;
+};
+
 export const campaignApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAllCampaigns: builder.query<GetAllCampaignsResponse, GetAllCampaignsParams>({
+    getAllCampaigns: builder.query<
+      GetAllCampaignsResponse,
+      GetAllCampaignsParams
+    >({
       query: ({
         page = 1,
         limit = 10,
@@ -160,12 +186,47 @@ export const campaignApi = baseApi.injectEndpoints({
           params,
         };
       },
+
+      providesTags: ["Campaign"],
     }),
 
     getCampaignById: builder.query<GetCampaignByIdResponse, string>({
       query: (id) => ({
         url: `/campaign/${id}`,
       }),
+
+      providesTags: (_result, _error, id) => [{ type: "Campaign", id }],
+    }),
+
+    earlyCompleteCampaign: builder.mutation<
+      EarlyCompleteCampaignResponse,
+      string
+    >({
+      query: (id) => ({
+        url: `/campaign/${id}/early-complete`,
+        method: "PATCH",
+      }),
+
+      invalidatesTags: (_result, _error, id) => [
+        "Campaign",
+        { type: "Campaign", id },
+      ],
+    }),
+
+    rejectCampaign: builder.mutation<
+      RejectCampaignResponse,
+      RejectCampaignPayload
+    >({
+      query: ({ id, rejectedReason }) => ({
+        url: `/campaign/${id}/reject`,
+        method: "PATCH",
+        body: { rejectedReason },
+      }),
+
+      invalidatesTags: (_result, _error, { id }) => [
+        "Campaign",
+        { type: "Campaign", id },
+      ],
     }),
   }),
 });
@@ -174,4 +235,6 @@ export const {
   useGetAllCampaignsQuery,
   useLazyGetCampaignByIdQuery,
   useGetCampaignByIdQuery,
+  useEarlyCompleteCampaignMutation,
+  useRejectCampaignMutation,
 } = campaignApi;

@@ -13,8 +13,10 @@ import {
   Loader2,
   LogOut,
   Mail,
+  Palette,
   Settings,
   UsersRound,
+  ClipboardCheck,
   WalletCards,
   X,
 } from "lucide-react";
@@ -37,6 +39,11 @@ const navigationItems = [
   { href: "/campaigns", label: "Campaigns", icon: Flag },
   { href: "/organizers", label: "Organizers", icon: UsersRound },
   { href: "/transactions", label: "Transactions", icon: WalletCards },
+
+  // Brand Builder
+  { href: "/brandBuilder", label: "Brand Builder", icon: Palette },
+  { href: "/review", label: "Review", icon: ClipboardCheck },
+
   { href: "/support", label: "Support", icon: Headphones },
   { href: "/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin", label: "Admin", icon: UsersRound },
@@ -89,7 +96,6 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Automatically open Content when one of its pages is active
   const isContentActive = pathname.startsWith("/content");
 
   const [isContentOpen, setIsContentOpen] = useState(isContentActive);
@@ -148,9 +154,9 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
           className="flex-1 space-y-1 overflow-y-auto px-3 py-6"
           aria-label="Dashboard navigation"
         >
-          {/* Main Navigation */}
           {navigationItems.map(({ href, label, icon: Icon }) => {
-            const isActive = pathname === href;
+            const isActive =
+              pathname === href || pathname.startsWith(`${href}/`);
 
             return (
               <Link
@@ -195,7 +201,6 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
               />
             </button>
 
-            {/* Content Items */}
             <div
               id="content-navigation"
               className={`grid transition-[grid-template-rows] duration-200 ease-out ${
@@ -251,7 +256,6 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
         </div>
       </aside>
 
-      {/* Logout Modal */}
       {showLogoutModal && (
         <LogoutConfirmModal
           onCancel={() => setShowLogoutModal(false)}

@@ -4,33 +4,33 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import AuthCard from "@/components/auth/AuthCard";
 import { useLoginMutation } from "@/store/api/authApi";
+import { getErrorMessage } from "@/lib/utils/error-handler";
+import { useToast } from "@/components/ToastProvider";
 
 export default function LoginPage() {
   const router = useRouter();
+
+  const { success, error } = useToast();
 
   const [email, setEmail] = useState("dev.mostafiz04@gmail.com");
   const [password, setPassword] = useState("test123@PASS");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberPassword, setRememberPassword] = useState(false);
-  const [error, setError] = useState("");
 
   const [login, { isLoading }] = useLoginMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    setError("");
-
     if (!email.trim()) {
-      setError("Please enter your email.");
+      error("Login Failed", "Please enter your email.");
       return;
     }
 
     if (!password) {
-      setError("Please enter your password.");
+      error("Login Failed", "Please enter your password.");
       return;
     }
 
@@ -48,29 +48,33 @@ export default function LoginPage() {
         response.data?.token ||
         response.data?.accessToken;
 
-      if (token) {
-        if (rememberPassword) {
-          localStorage.setItem("token", token);
-        } else {
-          sessionStorage.setItem("token", token);
-        }
+      if (!token) {
+        throw new Error(
+          "Login was successful, but no access token was received.",
+        );
       }
 
+      if (rememberPassword) {
+        localStorage.setItem("token", token);
+      } else {
+        sessionStorage.setItem("token", token);
+      }
+
+      success(
+        "Login Successful",
+        "Welcome back! You have been logged in successfully.",
+      );
+
       router.push("/home");
-    } catch (error: unknown) {
-      console.error("Login error:", error);
+    } catch (err: unknown) {
+      console.error("Login error:", err);
 
-      const apiError = error as FetchBaseQueryError;
+      const message = getErrorMessage(
+        err,
+        "Login failed. Please check your email and password.",
+      );
 
-      const message =
-        typeof apiError.data === "object" &&
-        apiError.data !== null &&
-        "message" in apiError.data &&
-        typeof apiError.data.message === "string"
-          ? apiError.data.message
-          : "Login failed. Please check your email and password.";
-
-      setError(message);
+      error("Login Failed", message);
     }
   };
 
@@ -141,13 +145,6 @@ export default function LoginPage() {
             </button>
           </div>
         </div>
-
-        {/* Error */}
-        {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">
-            {error}
-          </div>
-        )}
 
         {/* Remember + Forgot */}
         <div className="flex items-center justify-between gap-3 pt-1">

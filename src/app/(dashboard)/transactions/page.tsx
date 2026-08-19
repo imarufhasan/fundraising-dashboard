@@ -163,9 +163,6 @@ export default function TransactionsPage() {
 
   const isTableLoading = isLoading || isFetching;
 
-  // Summary numbers are computed from the currently loaded page only —
-  // the API doesn't return platform-wide aggregates, so these reflect
-  // what's visible in the table rather than an all-time total.
   const summary = useMemo(() => {
     const grossVolume = payments.reduce((sum, p) => sum + p.totalAmount, 0);
     const platformFees = payments.reduce((sum, p) => sum + p.platformFee, 0);

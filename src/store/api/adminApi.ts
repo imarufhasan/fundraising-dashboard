@@ -54,6 +54,12 @@ export type CreateAdminResponse = {
   data?: AdminUser;
 };
 
+export type UpdateAdminResponse = {
+  success: boolean;
+  message: string;
+  data?: AdminUser;
+};
+
 export const allApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllAdmin: builder.query<GetAllAdminResponse, GetAllAdminParams>({
@@ -68,20 +74,38 @@ export const allApi = baseApi.injectEndpoints({
         fromDate,
         toDate,
       }) => {
-        // Backend Zod validation rejects empty strings for these fields,
-        // so we only attach params that actually have a value.
         const params: Record<string, string | number> = {
           page,
           limit,
         };
 
-        if (searchTerm?.trim()) params.searchTerm = searchTerm.trim();
-        if (sortBy?.trim()) params.sortBy = sortBy.trim();
-        if (sortOrder?.trim()) params.sortOrder = sortOrder.trim();
-        if (role?.trim()) params.role = role.trim();
-        if (status?.trim()) params.status = status.trim();
-        if (fromDate?.trim()) params.fromDate = fromDate.trim();
-        if (toDate?.trim()) params.toDate = toDate.trim();
+        if (searchTerm?.trim()) {
+          params.searchTerm = searchTerm.trim();
+        }
+
+        if (sortBy?.trim()) {
+          params.sortBy = sortBy.trim();
+        }
+
+        if (sortOrder?.trim()) {
+          params.sortOrder = sortOrder.trim();
+        }
+
+        if (role?.trim()) {
+          params.role = role.trim();
+        }
+
+        if (status?.trim()) {
+          params.status = status.trim();
+        }
+
+        if (fromDate?.trim()) {
+          params.fromDate = fromDate.trim();
+        }
+
+        if (toDate?.trim()) {
+          params.toDate = toDate.trim();
+        }
 
         return {
           url: "/user/all",
@@ -97,12 +121,9 @@ export const allApi = baseApi.injectEndpoints({
         body,
       }),
     }),
+
     updateAdmin: builder.mutation<
-      {
-        success: boolean;
-        message: string;
-        data?: AdminUser;
-      },
+      UpdateAdminResponse,
       {
         id: string;
         name: string;
@@ -121,12 +142,19 @@ export const allApi = baseApi.injectEndpoints({
 
     updateAdminStatus: builder.mutation<
       UpdateAdminStatusResponse,
-      { id: string; status: AdminStatus }
+      {
+        id: string;
+        status: AdminStatus;
+        reason?: string;
+      }
     >({
-      query: ({ id, status }) => ({
+      query: ({ id, status, reason  }) => ({
         url: `/auth/update-status/${id}`,
         method: "PATCH",
-        body: { status },
+        body: {
+          status,
+          reason,
+        },
       }),
     }),
   }),

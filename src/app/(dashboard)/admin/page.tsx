@@ -20,7 +20,7 @@ import {
   useGetAllAdminQuery,
   useUpdateAdminMutation,
   useUpdateAdminStatusMutation,
-} from "@/store/api/allApi";
+} from "@/store/api/adminApi";
 import { getErrorMessage } from "@/lib/utils/error-handler";
 import { formatUSPhone } from "@/lib/utils/phone";
 import { useToast } from "@/components/ToastProvider";
@@ -45,7 +45,9 @@ export default function AdminPage() {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [formError, setFormError] = useState("");
 
+  // Status change target + reason (required, like the Organizers page)
   const [statusTarget, setStatusTarget] = useState<AdminUser | null>(null);
+  const [statusReason, setStatusReason] = useState("");
 
   const {
     data,
@@ -135,15 +137,27 @@ export default function AdminPage() {
 
   const openStatusModal = (admin: AdminUser) => {
     setStatusTarget(admin);
+    setStatusReason("");
   };
 
   const closeStatusModal = () => {
     if (isUpdatingStatus) return;
     setStatusTarget(null);
+    setStatusReason("");
   };
 
   const handleConfirmStatusChange = async () => {
     if (!statusTarget) return;
+
+    const trimmedReason = statusReason.trim();
+
+    if (!trimmedReason) {
+      error(
+        "Reason Required",
+        "Please provide a reason for this status change.",
+      );
+      return;
+    }
 
     const nextStatus: AdminStatus = isBlocked(statusTarget)
       ? "active"
@@ -153,6 +167,7 @@ export default function AdminPage() {
       const response = await updateAdminStatus({
         id: statusTarget.userId,
         status: nextStatus,
+        reason: trimmedReason,
       }).unwrap();
 
       if (!response?.success) {
@@ -166,7 +181,7 @@ export default function AdminPage() {
           : `${statusTarget.name} has regained access.`,
       );
 
-      setStatusTarget(null);
+      closeStatusModal();
 
       await refetch();
     } catch (err: unknown) {
@@ -203,19 +218,11 @@ export default function AdminPage() {
     const payloadPhone = `+1${digits}`;
 
     try {
-      console.log("UPDATE ADMIN PAYLOAD:", {
-        id: selectedAdmin.userId,
-        name: formName.trim(),
-        phoneNumber: payloadPhone,
-      });
-
       const response = await updateAdmin({
         id: selectedAdmin.userId,
         name: formName.trim(),
         phoneNumber: payloadPhone,
       }).unwrap();
-
-      console.log("UPDATE ADMIN RESPONSE:", response);
 
       if (!response?.success) {
         throw new Error(response?.message || "Failed to update admin.");
@@ -285,8 +292,6 @@ export default function AdminPage() {
           return;
         }
         const payloadPhone = `+1${digits}`;
-        console.log("FORM PHONE:", formPhone);
-        console.log("FINAL PAYLOAD PHONE:", payloadPhone);
 
         const formData = new FormData();
         formData.append("name", formName.trim());
@@ -507,14 +512,6 @@ export default function AdminPage() {
                           <Ban className="size-4" />
                         </button>
                       )}
-
-                      {/* <button
-                        type="button"
-                        className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-50 hover:text-rose-600"
-                        title="Delete Admin"
-                      >
-                        <Trash2 className="size-4" />
-                      </button> */}
                     </div>
                   </td>
                 </tr>
@@ -776,6 +773,7 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* Block / Unblock Modal — now requires a reason */}
       {statusTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -783,54 +781,131 @@ export default function AdminPage() {
             onClick={closeStatusModal}
           />
 
-          <div className="relative w-full max-w-sm rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl">
-            <div className="flex flex-col items-center text-center">
-              <div
-                className={`flex size-12 items-center justify-center rounded-full ${
-                  isBlocked(statusTarget)
-                    ? "bg-emerald-50 text-emerald-600"
-                    : "bg-rose-50 text-rose-600"
-                }`}
-              >
-                {isBlocked(statusTarget) ? (
-                  <ShieldCheck className="size-6" />
-                ) : (
-                  <ShieldAlert className="size-6" />
-                )}
+          <div className="relative w-full max-w-md rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex size-11 shrink-0 items-center justify-center rounded-full ${
+                    isBlocked(statusTarget)
+                      ? "bg-emerald-50 text-emerald-600"
+                      : "bg-rose-50 text-rose-600"
+                  }`}
+                >
+                  {isBlocked(statusTarget) ? (
+                    <ShieldCheck className="size-5" />
+                  ) : (
+                    <ShieldAlert className="size-5" />
+                  )}
+                </div>
+
+                <div>
+                  <h2 className="text-base font-black leading-tight text-slate-950">
+                    {isBlocked(statusTarget) ? "Unblock Admin" : "Block Admin"}
+                  </h2>
+
+                  <p className="mt-0.5 text-[12px] font-semibold text-slate-400">
+                    {statusTarget.name}
+                  </p>
+                </div>
               </div>
 
-              <h2 className="mt-4 text-base font-black text-slate-950">
-                {isBlocked(statusTarget)
-                  ? "Unblock this admin?"
-                  : "Block this admin?"}
-              </h2>
-
-              <p className="mt-1.5 text-sm text-slate-500">
-                {isBlocked(statusTarget) ? (
-                  <>
-                    <span className="font-bold text-slate-700">
-                      {statusTarget.name}
-                    </span>{" "}
-                    will regain access and be able to sign in again.
-                  </>
-                ) : (
-                  <>
-                    <span className="font-bold text-slate-700">
-                      {statusTarget.name}
-                    </span>{" "}
-                    will immediately lose access and won&apos;t be able to sign
-                    in until unblocked.
-                  </>
-                )}
-              </p>
-            </div>
-
-            <div className="mt-6 flex justify-center gap-2">
               <button
                 type="button"
                 onClick={closeStatusModal}
                 disabled={isUpdatingStatus}
-                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <div className="mt-5 space-y-5">
+              {/* Warning */}
+              <div
+                className={`rounded-xl border p-4 ${
+                  isBlocked(statusTarget)
+                    ? "border-emerald-200 bg-emerald-50"
+                    : "border-rose-200 bg-rose-50"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  {isBlocked(statusTarget) ? (
+                    <CheckCircle2 className="size-4 text-emerald-600" />
+                  ) : (
+                    <Ban className="size-4 text-rose-600" />
+                  )}
+
+                  <span
+                    className={`text-sm font-bold ${
+                      isBlocked(statusTarget)
+                        ? "text-emerald-700"
+                        : "text-rose-700"
+                    }`}
+                  >
+                    {isBlocked(statusTarget)
+                      ? "Unblock this admin?"
+                      : "Block this admin?"}
+                  </span>
+                </div>
+
+                <p
+                  className={`mt-1 text-[12px] font-medium leading-relaxed ${
+                    isBlocked(statusTarget)
+                      ? "text-emerald-600"
+                      : "text-rose-600"
+                  }`}
+                >
+                  {isBlocked(statusTarget) ? (
+                    <>
+                      <span className="font-bold">{statusTarget.name}</span>{" "}
+                      will regain access and be able to sign in again. Please
+                      provide a reason for this change.
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-bold">{statusTarget.name}</span>{" "}
+                      will immediately lose access and won&apos;t be able to
+                      sign in until unblocked. Please provide a reason.
+                    </>
+                  )}
+                </p>
+              </div>
+
+              {/* Reason */}
+              <div>
+                <label
+                  htmlFor="adminStatusReason"
+                  className="mb-2 block text-[12px] font-bold uppercase tracking-wider text-slate-500"
+                >
+                  Reason
+                </label>
+
+                <textarea
+                  id="adminStatusReason"
+                  value={statusReason}
+                  onChange={(e) => setStatusReason(e.target.value)}
+                  placeholder={
+                    isBlocked(statusTarget)
+                      ? "e.g. Issue resolved, restoring access..."
+                      : "e.g. Repeated policy violations..."
+                  }
+                  rows={5}
+                  disabled={isUpdatingStatus}
+                  className={`w-full resize-none rounded-xl border bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition-colors placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-60 ${
+                    isBlocked(statusTarget)
+                      ? "border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                      : "border-slate-200 focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-2 border-t border-slate-100 pt-4">
+              <button
+                type="button"
+                onClick={closeStatusModal}
+                disabled={isUpdatingStatus}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -838,23 +913,30 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={handleConfirmStatusChange}
-                disabled={isUpdatingStatus}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow-md transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                disabled={isUpdatingStatus || !statusReason.trim()}
+                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white shadow-md transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 ${
                   isBlocked(statusTarget)
                     ? "bg-emerald-600 shadow-emerald-600/20 hover:bg-emerald-700"
                     : "bg-rose-600 shadow-rose-600/20 hover:bg-rose-700"
                 }`}
               >
-                {isUpdatingStatus && (
-                  <Loader2 className="size-4 animate-spin" />
+                {isUpdatingStatus ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    {isBlocked(statusTarget) ? "Unblocking..." : "Blocking..."}
+                  </>
+                ) : (
+                  <>
+                    {isBlocked(statusTarget) ? (
+                      <CheckCircle2 className="size-4" />
+                    ) : (
+                      <Ban className="size-4" />
+                    )}
+                    {isBlocked(statusTarget)
+                      ? "Confirm Unblock"
+                      : "Confirm Block"}
+                  </>
                 )}
-                {isBlocked(statusTarget)
-                  ? isUpdatingStatus
-                    ? "Unblocking..."
-                    : "Yes, Unblock"
-                  : isUpdatingStatus
-                    ? "Blocking..."
-                    : "Yes, Block"}
               </button>
             </div>
           </div>

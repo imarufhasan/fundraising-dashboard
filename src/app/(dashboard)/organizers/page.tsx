@@ -15,17 +15,27 @@ import {
   ShoppingBag,
   Users,
   Loader2,
+  Ban,
+  CheckCircle2,
 } from "lucide-react";
+
+import { useToast } from "@/components/ToastProvider";
 import { Organizer, useGetAllOrganizersQuery } from "@/store/api/organizerApi";
+import {
+  AdminStatus,
+  useUpdateAdminStatusMutation,
+} from "@/store/api/adminApi";
 
 const LIMIT = 10;
 
 function useDebouncedValue<T>(value: T, delayMs: number) {
   const [debounced, setDebounced] = useState(value);
+
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(value), delayMs);
     return () => clearTimeout(timer);
   }, [value, delayMs]);
+
   return debounced;
 }
 
@@ -49,32 +59,44 @@ function getInitials(name: string) {
   );
 }
 
+function getErrorMessage(err: unknown, fallback: string) {
+  const message = (err as { data?: { message?: string } })?.data?.message;
+  return message || fallback;
+}
+
 function StatusBadge({ status }: { status: string }) {
   const normalized = status.toLowerCase();
 
   if (normalized === "active") {
     return (
-      <span className="rounded-full bg-emerald-50 px-3 py-1 text-[12px] font-bold text-emerald-600 border border-emerald-100">
+      <span className="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[12px] font-bold text-emerald-600">
         Active
       </span>
     );
   }
+
   if (normalized === "pending") {
     return (
-      <span className="rounded-full bg-amber-50 px-3 py-1 text-[12px] font-bold text-amber-600 border border-amber-100">
+      <span className="rounded-full border border-amber-100 bg-amber-50 px-3 py-1 text-[12px] font-bold text-amber-600">
         Pending
       </span>
     );
   }
-  if (normalized === "suspended" || normalized === "rejected") {
+
+  if (
+    normalized === "suspended" ||
+    normalized === "rejected" ||
+    normalized === "blocked"
+  ) {
     return (
-      <span className="rounded-full bg-rose-50 px-3 py-1 text-[12px] font-bold text-rose-600 border border-rose-100 capitalize">
+      <span className="rounded-full border border-rose-100 bg-rose-50 px-3 py-1 text-[12px] font-bold capitalize text-rose-600">
         {status}
       </span>
     );
   }
+
   return (
-    <span className="rounded-full bg-slate-100 px-3 py-1 text-[12px] font-bold text-slate-500 border border-slate-200 capitalize">
+    <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-[12px] font-bold capitalize text-slate-500">
       {status}
     </span>
   );
@@ -131,49 +153,64 @@ function Avatar({
   );
 }
 
-// Skeleton row that matches the table's column layout
 function SkeletonRow() {
   return (
     <tr className="animate-pulse">
-      <td className="py-4 px-6">
+      <td className="px-6 py-4">
         <div className="flex items-center gap-3">
           <div className="size-9 shrink-0 rounded-full bg-slate-100" />
           <div className="h-3.5 w-28 rounded bg-slate-100" />
         </div>
       </td>
-      <td className="py-4 px-6">
+
+      <td className="px-6 py-4">
         <div className="h-3.5 w-36 rounded bg-slate-100" />
         <div className="mt-2 h-3 w-24 rounded bg-slate-100" />
       </td>
-      <td className="py-4 px-6">
+
+      <td className="px-6 py-4">
         <div className="h-3.5 w-6 rounded bg-slate-100" />
       </td>
-      <td className="py-4 px-6">
+
+      <td className="px-6 py-4">
         <div className="h-3.5 w-16 rounded bg-slate-100" />
       </td>
-      <td className="py-4 px-6">
+
+      <td className="px-6 py-4">
         <div className="h-3.5 w-16 rounded bg-slate-100" />
       </td>
-      <td className="py-4 px-6">
+
+      <td className="px-6 py-4">
         <div className="h-5 w-16 rounded-full bg-slate-100" />
       </td>
-      <td className="py-4 px-6">
-        <div className="mx-auto h-6 w-16 rounded bg-slate-100" />
+
+      <td className="px-6 py-4">
+        <div className="mx-auto flex justify-center gap-2">
+          <div className="size-8 rounded-lg bg-slate-100" />
+          <div className="size-8 rounded-lg bg-slate-100" />
+        </div>
       </td>
     </tr>
   );
 }
 
 export default function OrganizersPage() {
+  const { success, error } = useToast();
+
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+
   const debouncedSearch = useDebouncedValue(searchTerm, 400);
 
-  const { data, isLoading, isFetching, isError } = useGetAllOrganizersQuery({
-    page,
-    limit: LIMIT,
-    searchTerm: debouncedSearch,
-  });
+  const [updateAdminStatus, { isLoading: isUpdatingStatus }] =
+    useUpdateAdminStatusMutation();
+
+  const { data, isLoading, isFetching, isError, refetch } =
+    useGetAllOrganizersQuery({
+      page,
+      limit: LIMIT,
+      searchTerm: debouncedSearch,
+    });
 
   const organizers = data?.data ?? [];
   const meta = data?.meta;
@@ -181,69 +218,136 @@ export default function OrganizersPage() {
 
   const isTableLoading = isLoading || isFetching;
 
+  // Details-only modal
   const [selectedOrganizer, setSelectedOrganizer] = useState<Organizer | null>(
     null,
   );
 
-  const handleViewDetails = (organizer: Organizer) =>
+  // Separate Block/Activate modal (with reason)
+  const [statusTarget, setStatusTarget] = useState<Organizer | null>(null);
+  const [statusReason, setStatusReason] = useState("");
+
+  const handleViewDetails = (organizer: Organizer) => {
     setSelectedOrganizer(organizer);
+  };
+
+  const closeDetailsModal = () => {
+    setSelectedOrganizer(null);
+  };
+
+  const openStatusModal = (organizer: Organizer) => {
+    setStatusTarget(organizer);
+    setStatusReason("");
+  };
+
+  const closeStatusModal = () => {
+    setStatusTarget(null);
+    setStatusReason("");
+  };
+
+  const nextStatusFor = (organizer: Organizer): AdminStatus =>
+    organizer.status.toLowerCase() === "active" ? "blocked" : "active";
+
+  const handleConfirmStatusChange = async () => {
+    if (!statusTarget) return;
+
+    const trimmedReason = statusReason.trim();
+
+    if (!trimmedReason) {
+      error(
+        "Reason Required",
+        "Please provide a reason for this status change.",
+      );
+      return;
+    }
+
+    const nextStatus = nextStatusFor(statusTarget);
+    const actionText = nextStatus === "blocked" ? "block" : "activate";
+
+    try {
+      const response = await updateAdminStatus({
+        id: statusTarget.userId,
+        status: nextStatus,
+        reason: trimmedReason,
+      }).unwrap();
+
+      success(
+        nextStatus === "blocked" ? "Organizer Blocked" : "Organizer Activated",
+        response.message ||
+          `The organizer has been ${actionText}d successfully.`,
+      );
+
+      // Keep details modal in sync if it's open for the same organizer
+      setSelectedOrganizer((prev) =>
+        prev && prev.userId === statusTarget.userId
+          ? { ...prev, status: nextStatus }
+          : prev,
+      );
+
+      refetch();
+      closeStatusModal();
+    } catch (err: unknown) {
+      error(
+        "Status Update Failed",
+        getErrorMessage(
+          err,
+          `Failed to ${actionText} organizer. Please try again.`,
+        ),
+      );
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Title & Actions Bar */}
+      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+        <h1 className="text-2xl font-black tracking-tight text-slate-900">
           Organizers
         </h1>
-        <div className="flex items-center gap-3">
-          {/* Search */}
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search organizers..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-            />
-          </div>
-          {/* Add Button */}
-          {/* <button
-            type="button"
-            className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/20 transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-700 active:scale-[0.98]"
-          >
-            <UserPlus className="size-4" />
-            <span>Add Organizer</span>
-          </button> */}
+
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+
+          <input
+            type="text"
+            placeholder="Search organizers..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setPage(1);
+            }}
+            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+          />
         </div>
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                <th className="py-4 px-6">Organizer</th>
-                <th className="py-4 px-6">Email</th>
-                <th className="py-4 px-6">Campaigns</th>
-                <th className="py-4 px-6">Total Revenue</th>
-                <th className="py-4 px-6">Joined</th>
-                <th className="py-4 px-6">Status</th>
-                <th className="py-4 px-6 text-center">Actions</th>
+                <th className="px-6 py-4">Organizer</th>
+                <th className="px-6 py-4">Email</th>
+                <th className="px-6 py-4">Campaigns</th>
+                <th className="px-6 py-4">Total Revenue</th>
+                <th className="px-6 py-4">Joined</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-center">Actions</th>
               </tr>
             </thead>
+
             <tbody className="divide-y divide-slate-100 text-sm font-semibold text-slate-700">
               {isTableLoading &&
                 Array.from({ length: LIMIT }).map((_, i) => (
                   <SkeletonRow key={`skeleton-${i}`} />
                 ))}
 
-              {isError && !isLoading && (
+              {isError && !isTableLoading && (
                 <tr>
                   <td
                     colSpan={7}
-                    className="py-16 text-center text-rose-500 font-semibold"
+                    className="py-16 text-center font-semibold text-rose-500"
                   >
                     Couldn&apos;t load organizers. Please try again.
                   </td>
@@ -252,80 +356,101 @@ export default function OrganizersPage() {
 
               {!isTableLoading &&
                 !isError &&
-                organizers.map((org) => (
-                  <tr
-                    key={org.userId}
-                    className="transition-colors duration-200 hover:bg-slate-50/30"
-                  >
-                    {/* Name with avatar */}
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <Avatar organizer={org} />
-                        <div className="font-extrabold text-slate-900 leading-tight">
-                          {org.name}
+                organizers.map((org) => {
+                  const isActive = org.status.toLowerCase() === "active";
+
+                  return (
+                    <tr
+                      key={org.userId}
+                      className="transition-colors duration-200 hover:bg-slate-50/30"
+                    >
+                      {/* Organizer */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar organizer={org} />
+
+                          <div className="font-extrabold leading-tight text-slate-900">
+                            {org.name}
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Email & Phone */}
-                    <td className="py-4 px-6">
-                      <div className="text-slate-900 font-extrabold leading-tight">
-                        {org.email}
-                      </div>
-                      <div className="text-[12px] text-slate-400 font-semibold mt-0.5">
-                        {org.phoneNumber ?? "—"}
-                      </div>
-                    </td>
+                      {/* Email */}
+                      <td className="px-6 py-4">
+                        <div className="font-extrabold leading-tight text-slate-900">
+                          {org.email}
+                        </div>
 
-                    {/* Campaigns Count */}
-                    <td className="py-4 px-6 font-bold text-slate-800">
-                      {org.totalCampaign}
-                    </td>
+                        <div className="mt-0.5 text-[12px] font-semibold text-slate-400">
+                          {org.phoneNumber ?? "—"}
+                        </div>
+                      </td>
 
-                    {/* Total Revenue */}
-                    <td className="py-4 px-6 font-bold text-slate-900">
-                      ${org.totalRevenue.toLocaleString()}
-                    </td>
+                      {/* Campaigns */}
+                      <td className="px-6 py-4 font-bold text-slate-800">
+                        {org.totalCampaign}
+                      </td>
 
-                    {/* Joined Date */}
-                    <td className="py-4 px-6 text-slate-500 font-medium">
-                      {formatDate(org.joinedAt)}
-                    </td>
+                      {/* Revenue */}
+                      <td className="px-6 py-4 font-bold text-slate-900">
+                        ${org.totalRevenue.toLocaleString()}
+                      </td>
 
-                    {/* Status */}
-                    <td className="py-4 px-6">
-                      <StatusBadge status={org.status} />
-                    </td>
+                      {/* Joined */}
+                      <td className="px-6 py-4 font-medium text-slate-500">
+                        {formatDate(org.joinedAt)}
+                      </td>
 
-                    {/* Actions */}
-                    <td className="py-4 px-6">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleViewDetails(org)}
-                          className="rounded-lg p-2 text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-indigo-600 active:scale-95"
-                          title="View Details"
-                        >
-                          <Eye className="size-4" />
-                        </button>
-                        {/* <button
-                          type="button"
-                          onClick={() => handleDelete(org)}
-                          className="rounded-lg p-2 text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-rose-600 active:scale-95"
-                          title="Delete Organizer"
-                        >
-                          <Trash2 className="size-4" />
-                        </button> */}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      {/* Status */}
+                      <td className="px-6 py-4">
+                        <StatusBadge status={org.status} />
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center gap-2">
+                          {/* View Details — details only, no status buttons inside */}
+                          <button
+                            type="button"
+                            onClick={() => handleViewDetails(org)}
+                            className="rounded-lg p-2 text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-indigo-600 active:scale-95"
+                            title="View Details"
+                          >
+                            <Eye className="size-4" />
+                          </button>
+
+                          {/* Block / Activate — opens separate reason modal */}
+                          <button
+                            type="button"
+                            onClick={() => openStatusModal(org)}
+                            className={`rounded-lg p-2 transition-all duration-200 active:scale-95 ${
+                              isActive
+                                ? "text-slate-400 hover:bg-rose-50 hover:text-rose-600"
+                                : "text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"
+                            }`}
+                            title={
+                              isActive
+                                ? "Block Organizer"
+                                : "Activate Organizer"
+                            }
+                          >
+                            {isActive ? (
+                              <Ban className="size-4" />
+                            ) : (
+                              <CheckCircle2 className="size-4" />
+                            )}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
 
               {!isTableLoading && !isError && organizers.length === 0 && (
                 <tr>
                   <td
                     colSpan={7}
-                    className="py-12 text-center text-slate-400 font-semibold"
+                    className="py-12 text-center font-semibold text-slate-400"
                   >
                     No organizers found.
                   </td>
@@ -354,7 +479,7 @@ export default function OrganizersPage() {
               <button
                 type="button"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
+                disabled={page <= 1 || isTableLoading}
                 className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-[12px] font-bold text-slate-600 transition-colors duration-200 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <ChevronLeft className="size-3.5" />
@@ -368,7 +493,10 @@ export default function OrganizersPage() {
                       p === 1 || p === totalPages || Math.abs(p - page) <= 1,
                   )
                   .reduce<number[]>((acc, p) => {
-                    if (acc.length && p - acc[acc.length - 1] > 1) acc.push(-1);
+                    if (acc.length && p - acc[acc.length - 1] > 1) {
+                      acc.push(-1);
+                    }
+
                     acc.push(p);
                     return acc;
                   }, [])
@@ -382,6 +510,7 @@ export default function OrganizersPage() {
                         key={p}
                         type="button"
                         onClick={() => setPage(p)}
+                        disabled={p === page || isTableLoading}
                         className={`min-w-7 rounded-lg px-2 py-1.5 text-[12px] font-bold transition-colors duration-200 ${
                           p === page
                             ? "bg-indigo-600 text-white"
@@ -397,7 +526,7 @@ export default function OrganizersPage() {
               <button
                 type="button"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
+                disabled={page >= totalPages || isTableLoading}
                 className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-[12px] font-bold text-slate-600 transition-colors duration-200 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next
@@ -408,50 +537,57 @@ export default function OrganizersPage() {
         )}
       </div>
 
-      {/* Organizer Details Modal */}
+      {/* Organizer Details Modal (view only) */}
       {selectedOrganizer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300"
-            onClick={() => setSelectedOrganizer(null)}
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={closeDetailsModal}
           />
-          <div className="relative w-full max-w-md scale-100 rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl transition-all duration-300 animate-in fade-in zoom-in-95 max-h-[85vh] overflow-y-auto">
+
+          <div className="relative max-h-[85vh] w-full max-w-md overflow-y-auto rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95">
             {/* Header */}
-            <div className="flex items-start justify-between pb-4 border-b border-slate-100">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
                 <Avatar organizer={selectedOrganizer} size="size-11" />
+
                 <div>
-                  <h2 className="text-base font-black text-slate-950 leading-tight">
+                  <h2 className="text-base font-black leading-tight text-slate-950">
                     {selectedOrganizer.name}
                   </h2>
+
                   <div className="mt-1 flex items-center gap-2">
-                    <span className="text-[12px] text-slate-400 font-bold capitalize">
+                    <span className="text-[12px] font-bold capitalize text-slate-400">
                       {selectedOrganizer.role}
                     </span>
+
                     <StatusBadge status={selectedOrganizer.status} />
                   </div>
                 </div>
               </div>
+
               <button
                 type="button"
-                onClick={() => setSelectedOrganizer(null)}
-                className="rounded-full p-2 text-slate-400 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-700 active:scale-95"
+                onClick={closeDetailsModal}
+                className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 active:scale-95"
               >
                 <X className="size-5" />
               </button>
             </div>
 
-            {/* Profile Info Details */}
+            {/* Details */}
             <div className="mt-5 space-y-4">
               <div className="space-y-3">
                 {/* Email */}
                 <div className="flex items-center gap-3 text-sm font-semibold text-slate-600">
                   <Mail className="size-4 text-slate-400" />
+
                   <div>
-                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">
+                    <div className="text-[12px] font-bold uppercase tracking-wider text-slate-400">
                       Email Address
                     </div>
-                    <div className="text-slate-800 font-bold">
+
+                    <div className="font-bold text-slate-800">
                       {selectedOrganizer.email}
                     </div>
                   </div>
@@ -460,11 +596,13 @@ export default function OrganizersPage() {
                 {/* Phone */}
                 <div className="flex items-center gap-3 text-sm font-semibold text-slate-600">
                   <Phone className="size-4 text-slate-400" />
+
                   <div>
-                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">
+                    <div className="text-[12px] font-bold uppercase tracking-wider text-slate-400">
                       Phone Number
                     </div>
-                    <div className="text-slate-800 font-bold">
+
+                    <div className="font-bold text-slate-800">
                       {selectedOrganizer.phoneNumber ?? "—"}
                     </div>
                   </div>
@@ -473,79 +611,93 @@ export default function OrganizersPage() {
                 {/* Joined */}
                 <div className="flex items-center gap-3 text-sm font-semibold text-slate-600">
                   <Calendar className="size-4 text-slate-400" />
+
                   <div>
-                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">
+                    <div className="text-[12px] font-bold uppercase tracking-wider text-slate-400">
                       Member Since
                     </div>
-                    <div className="text-slate-800 font-bold">
+
+                    <div className="font-bold text-slate-800">
                       {formatDate(selectedOrganizer.joinedAt)}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Campaign / Revenue Stats */}
-              <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 grid grid-cols-2 gap-4">
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
                 <div>
-                  <div className="flex items-center gap-1 text-[12px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="flex items-center gap-1 text-[12px] font-bold uppercase tracking-wider text-slate-400">
                     <Award className="size-3.5 text-slate-500" />
                     Campaigns
                   </div>
+
                   <div className="mt-1 text-lg font-black text-slate-900">
                     {selectedOrganizer.totalCampaign}
                   </div>
                 </div>
+
                 <div>
-                  <div className="flex items-center gap-1 text-[12px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="flex items-center gap-1 text-[12px] font-bold uppercase tracking-wider text-slate-400">
                     <DollarSign className="size-3.5 text-slate-500" />
                     Total Revenue
                   </div>
+
                   <div className="mt-1 text-lg font-black text-emerald-600">
                     ${selectedOrganizer.totalRevenue.toLocaleString()}
                   </div>
                 </div>
+
                 <div>
-                  <div className="flex items-center gap-1 text-[12px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="flex items-center gap-1 text-[12px] font-bold uppercase tracking-wider text-slate-400">
                     <Users className="size-3.5 text-slate-500" />
                     Supporters
                   </div>
+
                   <div className="mt-1 text-lg font-black text-slate-900">
                     {selectedOrganizer.supporters}
                   </div>
                 </div>
+
                 <div>
-                  <div className="flex items-center gap-1 text-[12px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="flex items-center gap-1 text-[12px] font-bold uppercase tracking-wider text-slate-400">
                     <ShoppingBag className="size-3.5 text-slate-500" />
                     Orders
                   </div>
+
                   <div className="mt-1 text-lg font-black text-slate-900">
                     {selectedOrganizer.totalOrders}
                   </div>
                 </div>
               </div>
 
-              {/* Campaign breakdown */}
+              {/* Campaign Breakdown */}
               <div className="grid grid-cols-3 gap-2 text-center">
                 <div className="rounded-xl border border-slate-100 bg-white p-2.5">
-                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                     Active
                   </div>
+
                   <div className="mt-0.5 text-sm font-black text-emerald-600">
                     {selectedOrganizer.totalActiveCampaign}
                   </div>
                 </div>
+
                 <div className="rounded-xl border border-slate-100 bg-white p-2.5">
-                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                     Cancelled
                   </div>
+
                   <div className="mt-0.5 text-sm font-black text-slate-500">
                     {selectedOrganizer.cancelledCampaign}
                   </div>
                 </div>
+
                 <div className="rounded-xl border border-slate-100 bg-white p-2.5">
-                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                     Rejected
                   </div>
+
                   <div className="mt-0.5 text-sm font-black text-rose-500">
                     {selectedOrganizer.rejectedCampaign}
                   </div>
@@ -553,28 +705,169 @@ export default function OrganizersPage() {
               </div>
             </div>
 
-            {/* Actions */}
+            {/* Details Footer — view only, status change happens in a separate modal */}
             <div className="mt-6 flex justify-end gap-2 border-t border-slate-100 pt-4">
               <button
                 type="button"
-                onClick={() => setSelectedOrganizer(null)}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-colors duration-200 hover:bg-slate-50 active:scale-95"
+                onClick={closeDetailsModal}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 active:scale-95"
               >
                 Close
               </button>
-              <button
-                type="button"
-                className={`rounded-xl px-4 py-2 text-sm font-bold text-white shadow-md transition-all duration-200 active:scale-95 ${
-                  selectedOrganizer.status === "active"
-                    ? "bg-rose-600 shadow-rose-600/20 hover:bg-rose-700"
-                    : "bg-emerald-600 shadow-emerald-600/20 hover:bg-emerald-700"
-                }`}
-              >
-                {selectedOrganizer.status === "active"
-                  ? "Suspend Account"
-                  : "Activate Account"}
-              </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Block / Activate Modal (with reason) */}
+      {statusTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => !isUpdatingStatus && closeStatusModal()}
+          />
+
+          <div className="relative w-full max-w-md rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95">
+            {(() => {
+              const nextStatus = nextStatusFor(statusTarget);
+              const isBlockAction = nextStatus === "blocked";
+
+              return (
+                <>
+                  <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar organizer={statusTarget} size="size-11" />
+
+                      <div>
+                        <h2 className="text-base font-black leading-tight text-slate-950">
+                          {isBlockAction
+                            ? "Block Organizer"
+                            : "Activate Organizer"}
+                        </h2>
+
+                        <p className="mt-0.5 text-[12px] font-semibold text-slate-400">
+                          {statusTarget.name}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={closeStatusModal}
+                      disabled={isUpdatingStatus}
+                      className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
+                    >
+                      <X className="size-5" />
+                    </button>
+                  </div>
+
+                  <div className="mt-5 space-y-5">
+                    {/* Warning */}
+                    <div
+                      className={`rounded-xl border p-4 ${
+                        isBlockAction
+                          ? "border-rose-200 bg-rose-50"
+                          : "border-emerald-200 bg-emerald-50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {isBlockAction ? (
+                          <Ban className="size-4 text-rose-600" />
+                        ) : (
+                          <CheckCircle2 className="size-4 text-emerald-600" />
+                        )}
+
+                        <span
+                          className={`text-sm font-bold ${
+                            isBlockAction ? "text-rose-700" : "text-emerald-700"
+                          }`}
+                        >
+                          {isBlockAction
+                            ? "Block this organizer?"
+                            : "Activate this organizer?"}
+                        </span>
+                      </div>
+
+                      <p
+                        className={`mt-1 text-[12px] font-medium leading-relaxed ${
+                          isBlockAction ? "text-rose-600" : "text-emerald-600"
+                        }`}
+                      >
+                        Please provide a reason. This will be saved along with
+                        the status change.
+                      </p>
+                    </div>
+
+                    {/* Reason */}
+                    <div>
+                      <label
+                        htmlFor="statusReason"
+                        className="mb-2 block text-[12px] font-bold uppercase tracking-wider text-slate-500"
+                      >
+                        Reason
+                      </label>
+
+                      <textarea
+                        id="statusReason"
+                        value={statusReason}
+                        onChange={(e) => setStatusReason(e.target.value)}
+                        placeholder={
+                          isBlockAction
+                            ? "e.g. Repeated policy violations..."
+                            : "e.g. Issue resolved, reinstating access..."
+                        }
+                        rows={5}
+                        disabled={isUpdatingStatus}
+                        className={`w-full resize-none rounded-xl border bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition-colors placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-60 ${
+                          isBlockAction
+                            ? "border-slate-200 focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                            : "border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="mt-6 flex justify-end gap-2 border-t border-slate-100 pt-4">
+                    <button
+                      type="button"
+                      onClick={closeStatusModal}
+                      disabled={isUpdatingStatus}
+                      className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleConfirmStatusChange}
+                      disabled={isUpdatingStatus || !statusReason.trim()}
+                      className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white shadow-md transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 ${
+                        isBlockAction
+                          ? "bg-rose-600 shadow-rose-600/20 hover:bg-rose-700"
+                          : "bg-emerald-600 shadow-emerald-600/20 hover:bg-emerald-700"
+                      }`}
+                    >
+                      {isUpdatingStatus ? (
+                        <>
+                          <Loader2 className="size-4 animate-spin" />
+                          {isBlockAction ? "Blocking..." : "Activating..."}
+                        </>
+                      ) : (
+                        <>
+                          {isBlockAction ? (
+                            <Ban className="size-4" />
+                          ) : (
+                            <CheckCircle2 className="size-4" />
+                          )}
+                          {isBlockAction ? "Confirm Block" : "Confirm Activate"}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}

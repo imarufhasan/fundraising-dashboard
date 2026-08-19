@@ -25,11 +25,10 @@ import {
   useSaveContentMutation,
 } from "@/store/api/contentApi";
 
-import { EditorContent, useEditor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
-import LinkExtension from "@tiptap/extension-link";
+
 import RichTextEditor from "@/components/RichTextEditor";
+import { getErrorMessage } from "@/lib/utils/error-handler";
+import { useToast } from "@/components/ToastProvider";
 
 type Tab = "write" | "preview";
 
@@ -138,36 +137,16 @@ function ContentEditorForm({
   initialContent: string;
   updatedAt?: string;
 }) {
-  /*
-   * Initial API content is used to initialize local draft.
-   *
-   * No useEffect is required.
-   */
+  const { success, error: showError } = useToast();
+
   const [draft, setDraft] = useState(initialContent);
-
   const [tab, setTab] = useState<Tab>("write");
-
-  const [saveError, setSaveError] = useState("");
-
-  const [showSuccess, setShowSuccess] = useState(false);
-
   const [saveContent, { isLoading: isSaving }] = useSaveContentMutation();
 
-  /*
-   * Check whether user changed the content.
-   */
   const isDirty = draft !== initialContent;
 
-  /*
-   * Save content
-   */
   const handleSave = async () => {
-    if (!isDirty || isSaving) {
-      return;
-    }
-
-    setSaveError("");
-    setShowSuccess(false);
+    if (!isDirty || isSaving) return;
 
     try {
       await saveContent({
@@ -175,41 +154,19 @@ function ContentEditorForm({
         content: draft,
       }).unwrap();
 
-      /*
-       * Save successful
-       */
-      setShowSuccess(true);
-
-      /*
-       * Hide success message after 2 seconds
-       */
-      window.setTimeout(() => {
-        setShowSuccess(false);
-      }, 2000);
-    } catch (err) {
-      const message =
-        typeof err === "object" &&
-        err !== null &&
-        "data" in err &&
-        typeof err.data === "object" &&
-        err.data !== null &&
-        "message" in err.data &&
-        typeof err.data.message === "string"
-          ? err.data.message
-          : "Failed to save content.";
-
-      setSaveError(message);
+      success("Content Saved", `${label} has been updated successfully.`);
+    } catch (err: unknown) {
+      console.error("SAVE CONTENT ERROR:", err);
+      const messageText = getErrorMessage(err, "Failed to save content.");
+      showError("Save Failed", messageText);
     }
   };
 
-  /*
-   * Reset draft to API content.
-   */
   const handleReset = () => {
     setDraft(initialContent);
-    setSaveError("");
-    setShowSuccess(false);
   };
+
+  // ...rest of JSX stays the same
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
@@ -263,8 +220,7 @@ function ContentEditorForm({
         </div>
       </div>
 
-      {/* Success */}
-      {showSuccess && (
+      {/* {showSuccess && (
         <StatusBanner
           tone="success"
           icon={<CheckCircle2 className="size-4" />}
@@ -272,14 +228,13 @@ function ContentEditorForm({
         />
       )}
 
-      {/* Error */}
       {saveError && (
         <StatusBanner
           tone="error"
           icon={<AlertTriangle className="size-4" />}
           message={saveError}
         />
-      )}
+      )} */}
 
       {/* Editor */}
       <div className="mt-5 rounded-2xl border border-slate-100 bg-white shadow-sm">
@@ -312,11 +267,7 @@ function ContentEditorForm({
           {tab === "write" ? (
             <RichTextEditor
               value={draft}
-              onChange={(value) => {
-                setDraft(value);
-                setSaveError("");
-                setShowSuccess(false);
-              }}
+              onChange={(value) => setDraft(value)}
             />
           ) : (
             <div className="min-h-120 rounded-xl border border-slate-200 bg-white p-6">
@@ -410,10 +361,6 @@ function ContentEditorForm({
   );
 }
 
-/* ================================================== */
-/* Back To Dashboard */
-/* ================================================== */
-
 function BackToDashboard() {
   return (
     <Link
@@ -425,10 +372,6 @@ function BackToDashboard() {
     </Link>
   );
 }
-
-/* ================================================== */
-/* Tab Button */
-/* ================================================== */
 
 function TabButton({
   active,
@@ -457,10 +400,6 @@ function TabButton({
   );
 }
 
-/* ================================================== */
-/* Status Banner */
-/* ================================================== */
-
 function StatusBanner({
   tone,
   icon,
@@ -485,10 +424,6 @@ function StatusBanner({
   );
 }
 
-/* ================================================== */
-/* Skeleton */
-/* ================================================== */
-
 function EditorSkeleton() {
   return (
     <div className="animate-pulse p-6">
@@ -498,10 +433,6 @@ function EditorSkeleton() {
     </div>
   );
 }
-
-/* ================================================== */
-/* Invalid Content Type */
-/* ================================================== */
 
 function InvalidContentType({ slug }: { slug: string }) {
   return (
