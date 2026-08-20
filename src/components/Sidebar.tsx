@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -117,13 +117,23 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
   const isContentActive = pathname.startsWith("/content");
   const [isContentOpen, setIsContentOpen] = useState(isContentActive);
 
-  const token =
-    localStorage.getItem("token") || sessionStorage.getItem("token");
+  // const token =
+  //   localStorage.getItem("token") || sessionStorage.getItem("token");
 
-  const role = localStorage.getItem("role") || sessionStorage.getItem("role");
+  // const role = localStorage.getItem("role") || sessionStorage.getItem("role");
 
-  console.log("role slider: ", role);
-  // support_admin
+  // console.log("role slider: ", role);
+  // // support_admin
+  // const isSupportAdmin = role === "support_admin";
+
+  const [role] = useState<string | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    return localStorage.getItem("role") || sessionStorage.getItem("role");
+  });
+
   const isSupportAdmin = role === "support_admin";
 
   const handleContentToggle = () => {

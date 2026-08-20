@@ -54,6 +54,41 @@ interface LoginResponse {
   data: LoginData;
 }
 
+interface BasicResponse {
+  success: boolean;
+  message: string;
+}
+
+interface ForgotPasswordPayload {
+  email: string;
+}
+
+interface VerifyOtpPayload {
+  email: string;
+  otp: string;
+}
+
+interface VerifyOtpResponse extends BasicResponse {
+  data: {
+    resetToken: string;
+  };
+}
+
+interface ResendOtpPayload {
+  email: string;
+}
+
+interface ResendOtpResponse extends BasicResponse {
+  data: {
+    geneated: boolean;
+  };
+}
+
+interface ResetPasswordPayload {
+  resetToken: string;
+  newPassword: string;
+}
+
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
@@ -71,13 +106,6 @@ export const authApi = baseApi.injectEndpoints({
         url: "/auth/me",
       }),
     }),
-    // updateProfile: builder.mutation<UpdateProfileResponse, FormData>({
-    //   query: (body) => ({
-    //     url: "/auth/profile",
-    //     method: "PATCH",
-    //     body,
-    //   }),
-    // }),
 
     updateProfile: builder.mutation({
       query: (formData: FormData) => ({
@@ -97,6 +125,38 @@ export const authApi = baseApi.injectEndpoints({
         body: { oldPassword, newPassword },
       }),
     }),
+
+    forgotPassword: builder.mutation<BasicResponse, ForgotPasswordPayload>({
+      query: (data) => ({
+        url: "/auth/forgot-password",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    verifyOtp: builder.mutation<VerifyOtpResponse, VerifyOtpPayload>({
+      query: (data) => ({
+        url: "/auth/verify-otp",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    resendOtp: builder.mutation<ResendOtpResponse, ResendOtpPayload>({
+      query: (data) => ({
+        url: "/auth/resend-otp",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    resetPassword: builder.mutation<BasicResponse, ResetPasswordPayload>({
+      query: ({ resetToken, newPassword }) => ({
+        url: `/auth/reset-password?resetToken=${resetToken}`,
+        method: "POST",
+        body: { newPassword },
+      }),
+    }),
   }),
 
   overrideExisting: false,
@@ -107,4 +167,9 @@ export const {
   useGetMeQuery,
   useUpdateProfileMutation,
   useChangePasswordMutation,
+
+  useForgotPasswordMutation,
+  useVerifyOtpMutation,
+  useResendOtpMutation,
+  useResetPasswordMutation,
 } = authApi;
