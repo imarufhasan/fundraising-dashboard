@@ -40,20 +40,18 @@ interface LoginRequest {
   password: string;
 }
 
+interface LoginData {
+  refreshToken: string;
+  accessToken: string;
+  role: string;
+  email: string;
+  isTwoFactorEnabled: boolean;
+}
+
 interface LoginResponse {
   success: boolean;
   message: string;
-  token?: string;
-  accessToken?: string;
-  data?: {
-    token?: string;
-    accessToken?: string;
-    user?: {
-      id: string;
-      name: string;
-      email: string;
-    };
-  };
+  data: LoginData;
 }
 
 export const authApi = baseApi.injectEndpoints({

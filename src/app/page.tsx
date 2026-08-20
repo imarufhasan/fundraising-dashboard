@@ -4,19 +4,32 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function RootPage() {
-    const router = useRouter();
+  const router = useRouter();
 
-    useEffect(() => {
-        const token =
-            localStorage.getItem("token") ||
-            sessionStorage.getItem("token");
+  useEffect(() => {
+    const token =
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("token");
 
-        if (token) {
-            router.replace("/home");
-        } else {
-            router.replace("/login");
-        }
-    }, [router]);
+    const role =
+      localStorage.getItem("role") ||
+      sessionStorage.getItem("role");
 
-    return null;
+    console.log("ROOT TOKEN:", token);
+    console.log("ROOT ROLE:", role);
+
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    if (role === "support_admin") {
+      router.replace("/support");
+      return;
+    }
+
+    router.replace("/home");
+  }, [router]);
+
+  return null;
 }

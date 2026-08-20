@@ -34,17 +34,37 @@ type LogoutConfirmModalProps = {
   isLoggingOut: boolean;
 };
 
+// const navigationItems = [
+//   { href: "/home", label: "Dashboard", icon: LayoutDashboard },
+//   { href: "/campaigns", label: "Campaigns", icon: Flag },
+//   { href: "/organizers", label: "Organizers", icon: UsersRound },
+//   { href: "/transactions", label: "Transactions", icon: WalletCards },
+
+//   // Brand Builder
+//   { href: "/brandBuilder", label: "Brand Builder", icon: Palette },
+//   { href: "/review", label: "Review", icon: ClipboardCheck },
+
+//   { href: "/support", label: "Support", icon: Headphones },
+//   { href: "/newsletter", label: "Newsletter", icon: Mail },
+//   { href: "/admin", label: "Admin", icon: UsersRound },
+//   { href: "/settings", label: "Settings", icon: Settings },
+// ];
+
 const navigationItems = [
   { href: "/home", label: "Dashboard", icon: LayoutDashboard },
   { href: "/campaigns", label: "Campaigns", icon: Flag },
   { href: "/organizers", label: "Organizers", icon: UsersRound },
   { href: "/transactions", label: "Transactions", icon: WalletCards },
-
-  // Brand Builder
   { href: "/brandBuilder", label: "Brand Builder", icon: Palette },
   { href: "/review", label: "Review", icon: ClipboardCheck },
 
-  { href: "/support", label: "Support", icon: Headphones },
+  {
+    href: "/support",
+    label: "Support",
+    icon: Headphones,
+    supportOnly: true,
+  },
+
   { href: "/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin", label: "Admin", icon: UsersRound },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -92,13 +112,19 @@ const contentItems = [
 const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
   const pathname = usePathname();
   const router = useRouter();
-
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-
   const isContentActive = pathname.startsWith("/content");
-
   const [isContentOpen, setIsContentOpen] = useState(isContentActive);
+
+  const token =
+    localStorage.getItem("token") || sessionStorage.getItem("token");
+
+  const role = localStorage.getItem("role") || sessionStorage.getItem("role");
+
+  console.log("role slider: ", role);
+  // support_admin
+  const isSupportAdmin = role === "support_admin";
 
   const handleContentToggle = () => {
     setIsContentOpen((prev) => !prev);
@@ -109,6 +135,7 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
 
     localStorage.removeItem("token");
     sessionStorage.removeItem("token");
+    // super_admin
 
     setTimeout(() => {
       setShowLogoutModal(false);
@@ -154,83 +181,89 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
           className="flex-1 space-y-1 overflow-y-auto px-3 py-6"
           aria-label="Dashboard navigation"
         >
-          {navigationItems.map(({ href, label, icon: Icon }) => {
-            const isActive =
-              pathname === href || pathname.startsWith(`${href}/`);
+          {navigationItems
+            .filter((item) =>
+              isSupportAdmin ? item.supportOnly === true : !item.supportOnly,
+            )
+            .map(({ href, label, icon: Icon }) => {
+              const isActive =
+                pathname === href || pathname.startsWith(`${href}/`);
 
-            return (
-              <Link
-                key={href}
-                href={href}
-                onClick={onClose}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
-                  isActive
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                    : "text-slate-300 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                <Icon className="size-4 shrink-0" aria-hidden="true" />
-                {label}
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={onClose}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
+                    isActive
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                      : "text-slate-300 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  <Icon className="size-4 shrink-0" aria-hidden="true" />
+                  {label}
+                </Link>
+              );
+            })}
 
           {/* Content Section */}
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={handleContentToggle}
-              className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                isContentActive
-                  ? "bg-white/10 text-white"
-                  : "text-slate-300 hover:bg-white/10 hover:text-white"
-              }`}
-              aria-expanded={isContentOpen}
-              aria-controls="content-navigation"
-            >
-              <span className="flex items-center gap-3">
-                <FileText className="size-4 shrink-0" aria-hidden="true" />
-                Content
-              </span>
-
-              <ChevronDown
-                className={`size-4 transition-transform duration-200 ${
-                  isContentOpen ? "rotate-180" : ""
+          {!isSupportAdmin && (
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={handleContentToggle}
+                className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                  isContentActive
+                    ? "bg-white/10 text-white"
+                    : "text-slate-300 hover:bg-white/10 hover:text-white"
                 }`}
-                aria-hidden="true"
-              />
-            </button>
+                aria-expanded={isContentOpen}
+                aria-controls="content-navigation"
+              >
+                <span className="flex items-center gap-3">
+                  <FileText className="size-4 shrink-0" aria-hidden="true" />
+                  Content
+                </span>
 
-            <div
-              id="content-navigation"
-              className={`grid transition-[grid-template-rows] duration-200 ease-out ${
-                isContentOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-              }`}
-            >
-              <div className="overflow-hidden">
-                <div className="ml-3 mt-1 space-y-1 border-l border-white/10 pl-3">
-                  {contentItems.map(({ href, label }) => {
-                    const isActive = pathname === href;
+                <ChevronDown
+                  className={`size-4 transition-transform duration-200 ${
+                    isContentOpen ? "rotate-180" : ""
+                  }`}
+                  aria-hidden="true"
+                />
+              </button>
 
-                    return (
-                      <Link
-                        key={href}
-                        href={href}
-                        onClick={onClose}
-                        className={`block rounded-md px-3 py-2 text-xs font-medium transition-all duration-200 ${
-                          isActive
-                            ? "bg-indigo-600 text-white shadow-sm"
-                            : "text-slate-400 hover:bg-white/10 hover:text-white"
-                        }`}
-                      >
-                        {label}
-                      </Link>
-                    );
-                  })}
+              <div
+                id="content-navigation"
+                className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+                  isContentOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="ml-3 mt-1 space-y-1 border-l border-white/10 pl-3">
+                    {contentItems.map(({ href, label }) => {
+                      const isActive = pathname === href;
+
+                      return (
+                        <Link
+                          key={href}
+                          href={href}
+                          onClick={onClose}
+                          className={`block rounded-md px-3 py-2 text-xs font-medium transition-all duration-200 ${
+                            isActive
+                              ? "bg-indigo-600 text-white shadow-sm"
+                              : "text-slate-400 hover:bg-white/10 hover:text-white"
+                          }`}
+                        >
+                          {label}
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </nav>
 
         {/* Logout */}

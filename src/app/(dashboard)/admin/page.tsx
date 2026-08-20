@@ -59,7 +59,6 @@ export default function AdminPage() {
     page,
     limit,
     searchTerm: searchTerm.trim() || undefined,
-    role: "admin",
     status: undefined,
     sortBy: undefined,
     sortOrder: undefined,

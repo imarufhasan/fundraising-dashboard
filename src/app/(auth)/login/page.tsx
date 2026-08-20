@@ -42,11 +42,8 @@ export default function LoginPage() {
 
       console.log("Login response:", response);
 
-      const token =
-        response.token ||
-        response.accessToken ||
-        response.data?.token ||
-        response.data?.accessToken;
+      const token = response.data?.accessToken;
+      const role = response.data.role;
 
       if (!token) {
         throw new Error(
@@ -56,8 +53,10 @@ export default function LoginPage() {
 
       if (rememberPassword) {
         localStorage.setItem("token", token);
+        localStorage.setItem("role", role);
       } else {
         sessionStorage.setItem("token", token);
+        sessionStorage.setItem("role", role);
       }
 
       success(
@@ -65,7 +64,11 @@ export default function LoginPage() {
         "Welcome back! You have been logged in successfully.",
       );
 
-      router.push("/home");
+      if (role === "support_admin") {
+        router.push("/support");
+      } else {
+        router.push("/home");
+      }
     } catch (err: unknown) {
       console.error("Login error:", err);
 
