@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AlertTriangle, ChevronLeft, ChevronRight, Mail, Search } from "lucide-react";
 
 import { useGetNewsletterSubscribersQuery } from "@/store/api/dashboardApi";
@@ -187,10 +187,6 @@ export default function NewsletterPage() {
     </div>
   );
 }
-
-/* =========================================================
-   SKELETON
-========================================================= */
 
 function NewsletterTableSkeleton() {
   return (

@@ -17,7 +17,6 @@ import Pagination from "@/components/ui/Pagination";
 import ExpandableTags from "@/components/ui/ExpandableTags";
 import BrandDetailsModal from "@/components/brand/BrandDetailsModal";
 import BrandCompleteModal from "@/components/brand/BrandCompleteModal";
-import { useToast } from "@/components/ToastProvider";
 
 const LIMIT = 10;
 
@@ -67,9 +66,7 @@ export default function BrandBuilderPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  const { success, error } = useToast();
 
-  // View-only details modal
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
 
   // Separate complete-confirmation modal
@@ -231,7 +228,7 @@ export default function BrandBuilderPage() {
                             <div className="flex items-center gap-3">
                               <BrandImage brand={brand} size="small" />
 
-                              <div className="min-w-0 max-w-[210px]">
+                              <div className="min-w-0 max-w-52.2">
                                 <p className="truncate text-sm font-extrabold text-slate-900">
                                   {brand.businessName || "Unnamed Brand"}
                                 </p>
@@ -260,7 +257,7 @@ export default function BrandBuilderPage() {
                                 )}
                               </div>
 
-                              <div className="min-w-0 max-w-[200px]">
+                              <div className="min-w-0 max-w-50">
                                 <p className="truncate text-sm font-bold text-slate-800">
                                   {brand.organizerName || "—"}
                                 </p>
@@ -275,7 +272,7 @@ export default function BrandBuilderPage() {
                           {/* Products — expandable, standard "+N more" pattern */}
                           <td className="px-6 py-4">
                             <div
-                              className="max-w-[220px]"
+                              className="max-w-55"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <ExpandableTags

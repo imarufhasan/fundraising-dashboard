@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -33,22 +33,6 @@ type LogoutConfirmModalProps = {
   onConfirm: () => void;
   isLoggingOut: boolean;
 };
-
-// const navigationItems = [
-//   { href: "/home", label: "Dashboard", icon: LayoutDashboard },
-//   { href: "/campaigns", label: "Campaigns", icon: Flag },
-//   { href: "/organizers", label: "Organizers", icon: UsersRound },
-//   { href: "/transactions", label: "Transactions", icon: WalletCards },
-
-//   // Brand Builder
-//   { href: "/brandBuilder", label: "Brand Builder", icon: Palette },
-//   { href: "/review", label: "Review", icon: ClipboardCheck },
-
-//   { href: "/support", label: "Support", icon: Headphones },
-//   { href: "/newsletter", label: "Newsletter", icon: Mail },
-//   { href: "/admin", label: "Admin", icon: UsersRound },
-//   { href: "/settings", label: "Settings", icon: Settings },
-// ];
 
 const navigationItems = [
   { href: "/home", label: "Dashboard", icon: LayoutDashboard },
@@ -117,15 +101,6 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
   const isContentActive = pathname.startsWith("/content");
   const [isContentOpen, setIsContentOpen] = useState(isContentActive);
 
-  // const token =
-  //   localStorage.getItem("token") || sessionStorage.getItem("token");
-
-  // const role = localStorage.getItem("role") || sessionStorage.getItem("role");
-
-  // console.log("role slider: ", role);
-  // // support_admin
-  // const isSupportAdmin = role === "support_admin";
-
   const [role] = useState<string | null>(() => {
     if (typeof window === "undefined") {
       return null;
@@ -145,7 +120,6 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
 
     localStorage.removeItem("token");
     sessionStorage.removeItem("token");
-    // super_admin
 
     setTimeout(() => {
       setShowLogoutModal(false);
@@ -161,7 +135,6 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
           isOpen ? "translate-x-0" : ""
         }`}
       >
-        {/* Logo */}
         <div className="flex h-20 items-center justify-between border-b border-white/10 px-6">
           <Link
             href="/home"
@@ -186,7 +159,6 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
           </button>
         </div>
 
-        {/* Navigation */}
         <nav
           className="flex-1 space-y-1 overflow-y-auto px-3 py-6"
           aria-label="Dashboard navigation"
@@ -216,7 +188,6 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
               );
             })}
 
-          {/* Content Section */}
           {!isSupportAdmin && (
             <div className="pt-2">
               <button
@@ -276,7 +247,6 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
           )}
         </nav>
 
-        {/* Logout */}
         <div className="border-t border-white/10 p-3">
           <button
             type="button"
@@ -317,7 +287,7 @@ function LogoutConfirmModal({
 }: LogoutConfirmModalProps) {
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 px-4 backdrop-blur-sm"
+      className="fixed inset-0 z-60 flex items-center justify-center bg-slate-900/50 px-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="logout-modal-title"

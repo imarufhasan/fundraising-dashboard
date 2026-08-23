@@ -25,12 +25,13 @@ export type GetReviewsResponse = {
 };
 
 export type ReviewSortOrder = "asc" | "desc";
+export type ReviewSortBy = "createdAt" | "updatedAt";
 
 export type GetReviewsParams = {
   page?: number;
   limit?: number;
   searchTerm?: string;
-  sortBy?: string;
+  sortBy?: ReviewSortBy;
   sortOrder?: ReviewSortOrder;
   isFeatured?: boolean;
   fromDate?: string;

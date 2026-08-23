@@ -18,6 +18,7 @@ import {
 
 import {
   Review,
+  ReviewSortBy,
   ReviewSortOrder,
   useGetAllReviewsQuery,
   useToggleReviewFeaturedMutation,
@@ -74,24 +75,6 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-// function FeaturedBadge({ isFeatured }: { isFeatured: boolean }) {
-//   if (isFeatured) {
-//     return (
-//       <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-3 py-1 text-[12px] font-bold text-amber-600">
-//         <Star className="size-3 fill-amber-500 text-amber-500" />
-//         Featured
-//       </span>
-//     );
-//   }
-
-//   return (
-//     <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-[12px] font-bold text-slate-500">
-//       <StarOff className="size-3" />
-//       Not Featured
-//     </span>
-//   );
-// }
-
 function OrganizerIdChip({ id }: { id: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -134,9 +117,8 @@ export default function ReviewsPage() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebouncedValue(searchTerm, 400);
-
+  const [sortBy, setSortBy] = useState<ReviewSortBy>("createdAt");
   const [featuredFilter, setFeaturedFilter] = useState<FeaturedFilter>("all");
-  const [sortBy, setSortBy] = useState<"createdAt" | "rating">("createdAt");
   const [sortOrder, setSortOrder] = useState<ReviewSortOrder>("desc");
 
   const [fromDate, setFromDate] = useState("");
@@ -281,13 +263,13 @@ export default function ReviewsPage() {
           <select
             value={sortBy}
             onChange={(e) => {
-              setSortBy(e.target.value as "createdAt" | "rating");
+              setSortBy(e.target.value as ReviewSortBy);
               setPage(1);
             }}
             className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12px] font-bold text-slate-700 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
           >
-            <option value="createdAt">Sort: Date</option>
-            <option value="rating">Sort: Rating</option>
+            <option value="createdAt">Sort: Date Created</option>
+            <option value="updatedAt">Sort: Date Updated</option>
           </select>
 
           {/* Sort order toggle */}

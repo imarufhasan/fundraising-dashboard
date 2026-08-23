@@ -121,7 +121,7 @@ export const authApi = baseApi.injectEndpoints({
     >({
       query: ({ oldPassword, newPassword }) => ({
         url: "/auth/changed-password",
-        method: "PATCH",
+        method: "POST",
         body: { oldPassword, newPassword },
       }),
     }),

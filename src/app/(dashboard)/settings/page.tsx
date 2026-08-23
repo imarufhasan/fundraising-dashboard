@@ -18,6 +18,7 @@ import {
 import { getErrorMessage } from "@/lib/utils/error-handler";
 import { useToast } from "@/components/ToastProvider";
 import imageCompression from "browser-image-compression";
+import { useRouter } from "next/navigation";
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150";
 
@@ -364,6 +365,7 @@ function ProfileInformation({
 
 function ChangePassword() {
   const { success, error } = useToast();
+  const router = useRouter();
 
   const [changePassword, { isLoading: isSavingPassword }] =
     useChangePasswordMutation();
@@ -427,6 +429,13 @@ function ChangePassword() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+
+      setTimeout(() => {
+        router.replace("/login");
+      }, 600);
     } catch (err: unknown) {
       const message = getErrorMessage(err, "Failed to update password.");
 
@@ -530,10 +539,6 @@ function ChangePassword() {
     </div>
   );
 }
-
-/* -------------------------------------------------------------------------- */
-/* Reusable Password Input                                                    */
-/* -------------------------------------------------------------------------- */
 
 function PasswordInput({
   label,

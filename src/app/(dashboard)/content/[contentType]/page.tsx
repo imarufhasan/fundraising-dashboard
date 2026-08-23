@@ -6,7 +6,6 @@ import { useParams } from "next/navigation";
 import {
   AlertTriangle,
   ArrowLeft,
-  CheckCircle2,
   Eye,
   Loader2,
   PenLine,
@@ -24,7 +23,6 @@ import {
   useGetContentQuery,
   useSaveContentMutation,
 } from "@/store/api/contentApi";
-
 
 import RichTextEditor from "@/components/RichTextEditor";
 import { getErrorMessage } from "@/lib/utils/error-handler";
@@ -69,19 +67,12 @@ function ContentEditor({ contentType }: { contentType: ContentType }) {
     );
   }
 
-  /*
-   * Error
-   */
   if (isError) {
     const status =
       typeof error === "object" && error !== null && "status" in error
         ? error.status
         : undefined;
 
-    /*
-     * 404 means content does not exist yet.
-     * We allow the user to create new content.
-     */
     if (status !== 404) {
       return (
         <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
@@ -166,19 +157,12 @@ function ContentEditorForm({
     setDraft(initialContent);
   };
 
-  // ...rest of JSX stays the same
-
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
-      {/* Back */}
+    <div className="mx-auto max-w-5xl">
       <BackToDashboard />
 
-      {/* Header */}
       <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-            Content
-          </p>
 
           <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
             {label}
@@ -220,25 +204,7 @@ function ContentEditorForm({
         </div>
       </div>
 
-      {/* {showSuccess && (
-        <StatusBanner
-          tone="success"
-          icon={<CheckCircle2 className="size-4" />}
-          message="Content saved successfully."
-        />
-      )}
-
-      {saveError && (
-        <StatusBanner
-          tone="error"
-          icon={<AlertTriangle className="size-4" />}
-          message={saveError}
-        />
-      )} */}
-
-      {/* Editor */}
       <div className="mt-5 rounded-2xl border border-slate-100 bg-white shadow-sm">
-        {/* Tabs */}
         <div className="flex items-center gap-1 border-b border-slate-100 px-3 pt-3">
           <TabButton
             active={tab === "write"}
@@ -262,7 +228,6 @@ function ContentEditorForm({
           )}
         </div>
 
-        {/* Editor */}
         <div className="p-4 sm:p-6">
           {tab === "write" ? (
             <RichTextEditor
@@ -373,7 +338,7 @@ function BackToDashboard() {
   );
 }
 
-function TabButton({
+function TabButton({ 
   active,
   onClick,
   icon,
@@ -400,29 +365,6 @@ function TabButton({
   );
 }
 
-function StatusBanner({
-  tone,
-  icon,
-  message,
-}: {
-  tone: "success" | "error";
-  icon: React.ReactNode;
-  message: string;
-}) {
-  const toneClass =
-    tone === "success"
-      ? "bg-emerald-50 text-emerald-700"
-      : "bg-rose-50 text-rose-700";
-
-  return (
-    <div
-      className={`mt-4 flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-sm font-semibold ${toneClass}`}
-    >
-      {icon}
-      {message}
-    </div>
-  );
-}
 
 function EditorSkeleton() {
   return (
@@ -455,40 +397,4 @@ function InvalidContentType({ slug }: { slug: string }) {
       </Link>
     </div>
   );
-}
-
-function EditorToolbarButton({
-  active,
-  onClick,
-  label,
-  title,
-  className = "",
-  disabled = false,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  title: string;
-  className?: string;
-  disabled?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      title={title}
-      disabled={disabled}
-      onClick={onClick}
-      className={`flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-xs font-bold transition-colors ${
-        active
-          ? "bg-indigo-100 text-indigo-700"
-          : "text-slate-600 hover:bg-white hover:text-indigo-600"
-      } disabled:cursor-not-allowed disabled:opacity-30 ${className}`}
-    >
-      {label}
-    </button>
-  );
-}
-
-function ToolbarDivider() {
-  return <div className="mx-1 h-5 w-px bg-slate-200" />;
 }

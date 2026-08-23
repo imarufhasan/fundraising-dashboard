@@ -11,8 +11,6 @@ import {
   ChevronRight,
   Loader2,
   Package,
-  CheckCircle2,
-  XCircle,
   Ban,
 } from "lucide-react";
 import {
@@ -158,13 +156,10 @@ export default function CampaignsPage() {
         res.message || "The campaign has been rejected successfully.",
       );
 
-      // Refresh campaign list
       refetch();
 
-      // Refresh campaign details
       fetchCampaignById(selectedId);
 
-      // Close reject modal
       closeModal();
     } catch (err: unknown) {
       const message = getErrorMessage(
@@ -226,8 +221,6 @@ export default function CampaignsPage() {
               {!isTableLoading &&
                 !isError &&
                 campaigns.map((campaign) => {
-                  const isActive = campaign.status.toLowerCase() === "active";
-
                   return (
                     <tr
                       key={campaign._id}

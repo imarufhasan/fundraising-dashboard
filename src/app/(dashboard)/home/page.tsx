@@ -4,15 +4,12 @@ import React, { useMemo, useState } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
   Coins,
   DollarSign,
   Loader2,
   Mail,
   Percent,
   Rocket,
-  Search,
   Store,
   TrendingUp,
   Users,
@@ -26,7 +23,6 @@ import Image from "next/image";
 
 const CIRCUMFERENCE = 2 * Math.PI * 54;
 const NEWSLETTER_PREVIEW_LIMIT = 5;
-const CAMPAIGNS_PAGE_SIZE = 5;
 
 function formatCurrency(value: number) {
   return `$${value.toLocaleString(undefined, {
@@ -58,8 +54,6 @@ function capitalize(text: string) {
 export default function Home() {
   const { data, isLoading, isError, refetch } = useGetDashboardAnalyticsQuery();
 
-  // Small preview fetch just for the subscriber count + a handful of recent
-  // emails; the full searchable/paginated list lives on the /newsletter page.
   const { data: newsletterData } = useGetNewsletterSubscribersQuery({
     page: 1,
     limit: NEWSLETTER_PREVIEW_LIMIT,
@@ -67,39 +61,6 @@ export default function Home() {
 
   const analytics = data?.data;
   const newsletterMeta = newsletterData?.meta;
-  const newsletterPreview = newsletterData?.data ?? [];
-
-  const [campaignSearch, setCampaignSearch] = useState("");
-  const [campaignPage, setCampaignPage] = useState(1);
-
-  const filteredCampaigns = useMemo(() => {
-    const list = analytics?.topCampaigns ?? [];
-    const term = campaignSearch.trim().toLowerCase();
-
-    if (!term) return list;
-
-    return list.filter(
-      (campaign) =>
-        campaign.name.toLowerCase().includes(term) ||
-        campaign.organizerName.toLowerCase().includes(term) ||
-        campaign.campaignStatus.toLowerCase().includes(term),
-    );
-  }, [analytics, campaignSearch]);
-
-  const campaignTotalPages = Math.max(
-    1,
-    Math.ceil(filteredCampaigns.length / CAMPAIGNS_PAGE_SIZE),
-  );
-
-  const paginatedCampaigns = useMemo(() => {
-    const start = (campaignPage - 1) * CAMPAIGNS_PAGE_SIZE;
-    return filteredCampaigns.slice(start, start + CAMPAIGNS_PAGE_SIZE);
-  }, [filteredCampaigns, campaignPage]);
-
-  const handleCampaignSearchChange = (value: string) => {
-    setCampaignSearch(value);
-    setCampaignPage(1);
-  };
 
   const donutSegments = useMemo(() => {
     if (!analytics) return [];
@@ -180,41 +141,52 @@ export default function Home() {
 
     const toXY = (value: number, index: number) => ({
       x: (index / Math.max(points.length - 1, 1)) * 100,
-      y: 90 - (value / maxValue) * 70,
+      y: 88 - (value / maxValue) * 72,
     });
 
-    const buildPath = (values: number[]) =>
-      values
-        .map((value, index) => {
-          const { x, y } = toXY(value, index);
+    // Smooth curve using cubic bezier between points (Catmull-Rom-ish)
+    const buildSmoothPath = (values: number[]) => {
+      const coords = values.map((v, i) => toXY(v, i));
 
-          return `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`;
-        })
-        .join(" ");
+      if (coords.length < 2) {
+        return coords.length ? `M ${coords[0].x} ${coords[0].y}` : "";
+      }
+
+      let path = `M ${coords[0].x.toFixed(2)} ${coords[0].y.toFixed(2)}`;
+
+      for (let i = 0; i < coords.length - 1; i++) {
+        const p0 = coords[i === 0 ? i : i - 1];
+        const p1 = coords[i];
+        const p2 = coords[i + 1];
+        const p3 = coords[i + 2 < coords.length ? i + 2 : i + 1];
+
+        const cp1x = p1.x + (p2.x - p0.x) / 6;
+        const cp1y = p1.y + (p2.y - p0.y) / 6;
+        const cp2x = p2.x - (p3.x - p1.x) / 6;
+        const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+        path += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+      }
+
+      return path;
+    };
 
     const revenueValues = points.map((point) => point.revenue);
     const feeValues = points.map((point) => point.platformFees);
 
-    const revenueLine = buildPath(revenueValues);
-    const feeLine = buildPath(feeValues);
+    const revenueLine = buildSmoothPath(revenueValues);
+    const feeLine = buildSmoothPath(feeValues);
 
-    const lastRevenuePoint = toXY(
-      revenueValues[revenueValues.length - 1],
-      revenueValues.length - 1,
-    );
-
-    const lastFeePoint = toXY(
-      feeValues[feeValues.length - 1],
-      feeValues.length - 1,
-    );
+    const revenuePoints = revenueValues.map((v, i) => toXY(v, i));
+    const feePoints = feeValues.map((v, i) => toXY(v, i));
 
     return {
       revenueLine,
       feeLine,
       revenueArea: `${revenueLine} L 100 100 L 0 100 Z`,
       feeArea: `${feeLine} L 100 100 L 0 100 Z`,
-      lastRevenuePoint,
-      lastFeePoint,
+      revenuePoints,
+      feePoints,
       yAxisLabels: [1, 0.75, 0.5, 0.25, 0].map((factor) =>
         formatCurrency(maxValue * factor),
       ),
@@ -258,9 +230,6 @@ export default function Home() {
 
   return (
     <main className="w-full max-w-none space-y-5 pb-8 sm:space-y-8 sm:pb-12">
-      {/* =========================
-          TOP METRICS
-      ========================== */}
       <section className="grid w-full grid-cols-2 gap-2.5 xs:gap-3 md:grid-cols-3 xl:grid-cols-6">
         <MetricCard
           icon={<TrendingUp className="size-5" />}
@@ -305,9 +274,6 @@ export default function Home() {
         />
       </section>
 
-      {/* =========================
-          SECONDARY METRICS
-      ========================== */}
       <section className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <SecondaryMetricCard
           label="Failed Payments"
@@ -338,23 +304,22 @@ export default function Home() {
         />
       </section>
 
-      {/* =========================
-          REVENUE SECTION
-      ========================== */}
       <section className="grid w-full grid-cols-1 gap-4 lg:grid-cols-2">
         {/* Revenue Overview */}
         <div className="w-full rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
-          <div className="mb-5 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
-            <h3 className="font-bold text-slate-800">Revenue Overview</h3>
+          <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className="text-lg font-bold text-slate-800">
+              Revenue Overview
+            </h3>
 
-            <div className="flex flex-wrap items-center gap-3 text-xs font-semibold">
-              <div className="flex items-center gap-1.5 text-slate-600">
-                <span className="size-2 rounded-full bg-cyan-400" />
+            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold">
+              <div className="flex items-center gap-2 text-slate-600">
+                <span className="size-2.5 rounded-full bg-cyan-500" />
                 Revenue
               </div>
 
-              <div className="flex items-center gap-1.5 text-slate-600">
-                <span className="size-2 rounded-full bg-purple-500" />
+              <div className="flex items-center gap-2 text-slate-600">
+                <span className="size-2.5 rounded-full bg-purple-500" />
                 Platform Fees
               </div>
             </div>
@@ -362,7 +327,14 @@ export default function Home() {
 
           {chart ? (
             <>
-              <div className="relative h-44 w-full sm:h-48">
+              <div className="relative h-56 w-full pl-10 sm:h-64 sm:pl-12">
+                {/* Y-axis labels */}
+                <div className="absolute inset-y-0 left-0 flex flex-col justify-between text-[10px] font-semibold text-slate-400">
+                  {chart.yAxisLabels.map((label, index) => (
+                    <span key={index}>{label}</span>
+                  ))}
+                </div>
+
                 <svg
                   className="size-full overflow-visible"
                   viewBox="0 0 100 100"
@@ -378,10 +350,10 @@ export default function Home() {
                     >
                       <stop
                         offset="0%"
-                        stopColor="#22d3ee"
-                        stopOpacity="0.15"
+                        stopColor="#06b6d4"
+                        stopOpacity="0.18"
                       />
-                      <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
+                      <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
                     </linearGradient>
 
                     <linearGradient
@@ -391,70 +363,83 @@ export default function Home() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="0%" stopColor="#a855f7" stopOpacity="0.1" />
+                      <stop
+                        offset="0%"
+                        stopColor="#a855f7"
+                        stopOpacity="0.15"
+                      />
                       <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
                     </linearGradient>
                   </defs>
 
-                  {[20, 40, 60, 80].map((y) => (
+                  {/* Grid lines */}
+                  {[0, 25, 50, 75, 100].map((y) => (
                     <line
                       key={y}
                       x1="0"
-                      y1={y}
+                      y1={88 - (y / 100) * 72}
                       x2="100"
-                      y2={y}
+                      y2={88 - (y / 100) * 72}
                       stroke="#f1f5f9"
-                      strokeWidth="0.5"
+                      strokeWidth="0.6"
                     />
                   ))}
 
+                  {/* Revenue area + line */}
                   <path d={chart.revenueArea} fill="url(#revenueGradient)" />
-
                   <path
                     d={chart.revenueLine}
                     fill="none"
-                    stroke="#22d3ee"
-                    strokeWidth="2.5"
+                    stroke="#06b6d4"
+                    strokeWidth="2.2"
                     strokeLinecap="round"
+                    strokeLinejoin="round"
+                    vectorEffect="non-scaling-stroke"
                   />
 
+                  {/* Fee area + line */}
                   <path d={chart.feeArea} fill="url(#feeGradient)" />
-
                   <path
                     d={chart.feeLine}
                     fill="none"
                     stroke="#a855f7"
-                    strokeWidth="2"
+                    strokeWidth="2.2"
                     strokeLinecap="round"
+                    strokeLinejoin="round"
+                    vectorEffect="non-scaling-stroke"
                   />
 
-                  <circle
-                    cx={chart.lastRevenuePoint.x}
-                    cy={chart.lastRevenuePoint.y}
-                    r="3.5"
-                    fill="#22d3ee"
-                    stroke="#fff"
-                    strokeWidth="1.5"
-                  />
-
-                  <circle
-                    cx={chart.lastFeePoint.x}
-                    cy={chart.lastFeePoint.y}
-                    r="3"
-                    fill="#a855f7"
-                    stroke="#fff"
-                    strokeWidth="1.5"
-                  />
-                </svg>
-
-                <div className="absolute inset-y-0 left-0 z-10 flex flex-col justify-between bg-white/80 pr-2 text-[9px] font-bold text-slate-400">
-                  {chart.yAxisLabels.map((label, index) => (
-                    <span key={index}>{label}</span>
+                  {/* Revenue dots */}
+                  {chart.revenuePoints.map((point, index) => (
+                    <circle
+                      key={`rev-${index}`}
+                      cx={point.x}
+                      cy={point.y}
+                      r="1.6"
+                      fill="#06b6d4"
+                      stroke="#fff"
+                      strokeWidth="1"
+                      vectorEffect="non-scaling-stroke"
+                    />
                   ))}
-                </div>
+
+                  {/* Fee dots */}
+                  {chart.feePoints.map((point, index) => (
+                    <circle
+                      key={`fee-${index}`}
+                      cx={point.x}
+                      cy={point.y}
+                      r="1.4"
+                      fill="#a855f7"
+                      stroke="#fff"
+                      strokeWidth="1"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  ))}
+                </svg>
               </div>
 
-              <div className="mt-2 flex justify-between gap-1 overflow-hidden pl-7 text-[8px] font-bold text-slate-400 sm:gap-2 sm:pl-8 sm:text-[9px]">
+              <div className="mt-3 flex justify-between gap-1 overflow-hidden pl-10 text-[10px] font-semibold text-slate-400 sm:pl-12 sm:text-xs">
                 {chart.xAxisLabels.map((label, index) => (
                   <span key={index} className="truncate">
                     {label}
@@ -463,13 +448,12 @@ export default function Home() {
               </div>
             </>
           ) : (
-            <div className="flex h-44 items-center justify-center text-sm font-semibold text-slate-400 sm:h-48">
+            <div className="flex h-56 items-center justify-center text-sm font-semibold text-slate-400 sm:h-64">
               No revenue data for this period yet.
             </div>
           )}
         </div>
 
-        {/* Revenue Breakdown */}
         <div className="w-full rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
           <h3 className="mb-5 font-bold text-slate-800">
             Platform Revenue Breakdown
@@ -529,13 +513,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* =========================
-          TOP CAMPAIGNS + RECENT BRAND BUILDERS
-      ========================== */}
       <section className="grid w-full grid-cols-1 gap-4 xl:grid-cols-2 xl:items-start">
-        {/* Top Campaigns */}
-
-        {/* Top Campaigns */}
         <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
           <div className="mb-5">
             <h3 className="font-bold text-slate-800">
@@ -543,7 +521,6 @@ export default function Home() {
             </h3>
           </div>
 
-          {/* Desktop / tablet table */}
           <div className="hidden w-full overflow-x-auto sm:block">
             <table className="w-full min-w-190 border-collapse text-left">
               <thead>
@@ -586,7 +563,6 @@ export default function Home() {
             </table>
           </div>
 
-          {/* Mobile card list */}
           <div className="space-y-3 sm:hidden">
             {topCampaigns.map((campaign, index) => (
               <CampaignCard
@@ -609,7 +585,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Recent Brand Builders */}
         <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
           <div className="mb-5">
             <h3 className="font-bold text-slate-800">Recent Brand Builders</h3>

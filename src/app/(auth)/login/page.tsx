@@ -17,7 +17,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("dev.mostafiz04@gmail.com");
   const [password, setPassword] = useState("test123@PASS");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberPassword, setRememberPassword] = useState(false);
+  const [rememberPassword, setRememberPassword] = useState(true);
 
   const [login, { isLoading }] = useLoginMutation();
 
