@@ -200,6 +200,7 @@ export default function CampaignsPage() {
                 <th className="py-4 px-6">Progress</th>
                 <th className="py-4 px-6">Supporters</th>
                 <th className="py-4 px-6">Status</th>
+                <th className="py-4 px-6">Cancel Reason</th>
                 <th className="py-4 px-6 text-center">Actions</th>
               </tr>
             </thead>
@@ -214,6 +215,17 @@ export default function CampaignsPage() {
                     className="py-16 text-center text-rose-500 font-semibold"
                   >
                     Couldn&apos;t load campaigns. Please try again.
+                  </td>
+                </tr>
+              )}
+
+              {!isTableLoading && !isError && campaigns.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={8}
+                    className="py-12 text-center text-slate-400 font-semibold"
+                  >
+                    No campaigns found.
                   </td>
                 </tr>
               )}
@@ -274,6 +286,20 @@ export default function CampaignsPage() {
                       <td className="py-4 px-6">
                         <StatusBadge status={campaign.status} />
                       </td>
+
+                      <td className="py-4 px-6 max-w-45">
+                        {campaign.cancelledReason ? (
+                          <span
+                            className="block truncate text-slate-600 font-medium cursor-help"
+                            title={campaign.cancelledReason}
+                          >
+                            {campaign.cancelledReason} 
+                          </span>
+                        ) : (
+                          <span className="text-slate-300">—</span>
+                        )}
+                      </td>
+
                       <td className="py-4 px-6">
                         <div className="flex items-center justify-center gap-2">
                           {/* View Details */}
@@ -780,6 +806,10 @@ function CampaignTableSkeleton() {
 
           <td className="px-6 py-5">
             <div className="h-7 w-20 rounded-full bg-slate-200" />
+          </td>
+
+          <td className="px-6 py-5">
+            <div className="h-4 w-24 rounded bg-slate-200" />
           </td>
 
           <td className="px-6 py-5">

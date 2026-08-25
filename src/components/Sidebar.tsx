@@ -18,6 +18,7 @@ import {
   UsersRound,
   ClipboardCheck,
   WalletCards,
+  Tag,
   X,
 } from "lucide-react";
 
@@ -39,6 +40,7 @@ const navigationItems = [
   { href: "/campaigns", label: "Campaigns", icon: Flag },
   { href: "/organizers", label: "Organizers", icon: UsersRound },
   { href: "/transactions", label: "Transactions", icon: WalletCards },
+  { href: "/promo-codes", label: "Promo Codes", icon: Tag },
   { href: "/brandBuilder", label: "Brand Builder", icon: Palette },
   { href: "/review", label: "Review", icon: ClipboardCheck },
 

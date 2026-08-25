@@ -70,7 +70,8 @@ export type Campaign = {
   organizerAmount: number;
   organizerAmountWithoutShipping: number;
   supporters?: CampaignSupporter[];
-  rejectedReason?: string | null; // 👈 add this line
+  rejectedReason?: string | null; 
+  cancelledReason?: string | null; 
 };
 
 // ---------- Detail-only types ----------
