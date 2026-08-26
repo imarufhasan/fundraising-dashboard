@@ -606,7 +606,7 @@ export default function ReviewsPage() {
                 </div>
               </div>
             </div> */}
-            <div className="flex items-center justify-between">
+            <div className="flex mx-5 items-center justify-between">
               <StarRating rating={selectedReview.rating} />
               <FeaturedBadge
                 isFeatured={selectedReview.isFeatured}

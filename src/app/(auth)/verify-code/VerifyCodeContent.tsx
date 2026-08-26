@@ -93,7 +93,7 @@ export default function VerifyCodeContent() {
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-        <div className="flex justify-center gap-2.5">
+        {/* <div className="flex justify-center gap-2.5">
           {digits.map((digit, index) => (
             <input
               key={index}
@@ -107,6 +107,23 @@ export default function VerifyCodeContent() {
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               className="size-12 rounded-lg border border-slate-200 text-center text-base font-semibold text-slate-800 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+            />
+          ))}
+        </div> */}
+        <div className="flex w-full justify-center gap-1.5 sm:gap-2.5">
+          {digits.map((digit, index) => (
+            <input
+              key={index}
+              ref={(el) => {
+                inputsRef.current[index] = el;
+              }}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={digit}
+              onChange={(e) => handleChange(index, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(index, e)}
+              className="h-11 min-w-0 flex-1 rounded-lg border border-slate-200 text-center text-base font-semibold text-slate-800 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:h-12 sm:max-w-12"
             />
           ))}
         </div>

@@ -72,6 +72,7 @@ export type Campaign = {
   supporters?: CampaignSupporter[];
   rejectedReason?: string | null; 
   cancelledReason?: string | null; 
+  rejectionReason?: string | null;
 };
 
 // ---------- Detail-only types ----------

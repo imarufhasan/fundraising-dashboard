@@ -235,7 +235,7 @@ export default function TransactionsPage() {
         <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="space-y-1">
             <span className="text-sm font-semibold text-slate-400">
-              Disputes
+              Failed
             </span>
             <div className="text-2xl font-black text-slate-900">
               {isTableLoading ? (
@@ -291,8 +291,8 @@ export default function TransactionsPage() {
         </div>
 
         {/* Transactions Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
+        <div className="w-full overflow-x-auto">
+          <table className="w-full min-w-225 border-collapse text-left">
             <thead>
               <tr className="border-b border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 <th className="pb-3 pr-4">Transaction</th>

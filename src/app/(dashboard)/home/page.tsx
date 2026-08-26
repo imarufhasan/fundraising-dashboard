@@ -656,9 +656,9 @@ type MetricCardProps = {
 
 function MetricCard({ icon, iconClass, value, label }: MetricCardProps) {
   return (
-    <div className="flex w-full min-w-0 items-center gap-2.5 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:gap-3 sm:p-4">
+    <div className="flex w-full min-w-0 items-start gap-2.5 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:gap-3 sm:p-4">
       <div
-        className={`flex size-10 shrink-0 items-center justify-center rounded-2xl sm:size-11 ${iconClass}`}
+        className={`flex size-10 shrink-0 items-center-safe justify-center rounded-2xl sm:size-11 ${iconClass}`}
       >
         {icon}
       </div>
@@ -668,7 +668,7 @@ function MetricCard({ icon, iconClass, value, label }: MetricCardProps) {
           {value}
         </div>
 
-        <div className="truncate text-[11px] font-medium text-slate-500 sm:text-xs lg:text-sm">
+        <div className="text-[11px] font-medium text-slate-500 sm:text-xs lg:text-sm">
           {label}
         </div>
       </div>

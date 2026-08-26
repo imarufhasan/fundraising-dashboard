@@ -68,7 +68,7 @@ function StatusBadge({ status }: { status: string }) {
     normalized === "rejected"
   ) {
     return (
-      <span className="rounded-md bg-rose-50 px-2.5 py-0.5 text-[12px] font-extrabold text-rose-600 border-2 border-rose-600 leading-normal inline-block uppercase tracking-wider">
+      <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-[12px] font-bold text-rose-600 border-2 border-rose-600 leading-normal inline-block uppercase tracking-wider">
         {status}
       </span>
     );
@@ -201,6 +201,7 @@ export default function CampaignsPage() {
                 <th className="py-4 px-6">Supporters</th>
                 <th className="py-4 px-6">Status</th>
                 <th className="py-4 px-6">Cancel Reason</th>
+                <th className="py-4 px-6">Reject Reason</th>
                 <th className="py-4 px-6 text-center">Actions</th>
               </tr>
             </thead>
@@ -293,7 +294,21 @@ export default function CampaignsPage() {
                             className="block truncate text-slate-600 font-medium cursor-help"
                             title={campaign.cancelledReason}
                           >
-                            {campaign.cancelledReason} 
+                            {campaign.cancelledReason}
+                          </span>
+                        ) : (
+                          <span className="text-slate-300">—</span>
+                        )}
+                      </td>
+
+                      {/* Reject Reason */}
+                      <td className="py-4 px-6 max-w-45">
+                        {campaign.rejectionReason ? (
+                          <span
+                            className="block truncate text-slate-600 font-medium cursor-help"
+                            title={campaign.rejectionReason}
+                          >
+                            {campaign.rejectionReason}
                           </span>
                         ) : (
                           <span className="text-slate-300">—</span>
