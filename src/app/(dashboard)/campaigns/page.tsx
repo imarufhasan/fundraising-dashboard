@@ -68,7 +68,7 @@ function StatusBadge({ status }: { status: string }) {
     normalized === "rejected"
   ) {
     return (
-      <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-[12px] font-bold text-rose-600 border-2 border-rose-600 leading-normal inline-block uppercase tracking-wider">
+      <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-[12px] font-bold text-rose-600 border border-rose-300 leading-normal inline-block uppercase tracking-wider">
         {status}
       </span>
     );
