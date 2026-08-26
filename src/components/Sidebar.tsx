@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 
 import logo from "../images/logo.png";
+import { useDispatch } from "react-redux";
+import { baseApi } from "@/store/api/baseApi";
 
 type SidebarProps = {
   isOpen?: boolean;
@@ -97,6 +99,7 @@ const contentItems = [
 
 const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
   const pathname = usePathname();
+  const dispatch = useDispatch();
   const router = useRouter();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -117,18 +120,24 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
     setIsContentOpen((prev) => !prev);
   };
 
-  const handleConfirmLogout = () => {
-    setIsLoggingOut(true);
+const handleConfirmLogout = () => {
+  setIsLoggingOut(true);
 
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
 
-    setTimeout(() => {
-      setShowLogoutModal(false);
-      onClose?.();
-      router.replace("/login");
-    }, 600);
-  };
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("role");
+
+  // Clear all RTK Query cached data
+  dispatch(baseApi.util.resetApiState());
+
+  setTimeout(() => {
+    setShowLogoutModal(false);
+    onClose?.();
+    router.replace("/login");
+  }, 600);
+};
 
   return (
     <>

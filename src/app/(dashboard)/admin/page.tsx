@@ -12,6 +12,9 @@ import {
   CheckCircle2,
   ShieldAlert,
   ShieldCheck,
+  Eye,
+  EyeOff,
+  UserRound,
 } from "lucide-react";
 
 import {
@@ -37,9 +40,10 @@ export default function AdminPage() {
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null);
 
+  const [formPassword, setFormPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
-  const [formPassword, setFormPassword] = useState("");
   const [formPhone, setFormPhone] = useState("");
   const [formRole, setFormRole] = useState<AdminRole>("admin");
   const [profileImage, setProfileImage] = useState<File | null>(null);
@@ -72,6 +76,8 @@ export default function AdminPage() {
     useUpdateAdminStatusMutation();
 
   const admins = data?.data ?? [];
+  console.log("admins list: ", admins);
+
   const meta = data?.meta;
 
   const getAdminId = (admin: AdminUser) => {
@@ -82,12 +88,12 @@ export default function AdminPage() {
     return admin.phoneNumber || "-";
   };
 
-  const getImage = (admin: AdminUser) => {
-    return (
-      admin.profileImage ||
-      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150"
-    );
-  };
+  // const getImage = (admin: AdminUser) => {
+  //   return (
+  //     admin.profileImage ||
+  //     "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150"
+  //   );
+  // };
 
   const getStatusLabel = (status?: string) => {
     if (!status) return "Unknown";
@@ -105,6 +111,7 @@ export default function AdminPage() {
     setFormName("");
     setFormEmail("");
     setFormPassword("");
+    setShowPassword(false);
     setFormPhone("");
     setFormRole("admin");
     setProfileImage(null);
@@ -249,6 +256,7 @@ export default function AdminPage() {
     setFormName("");
     setFormEmail("");
     setFormPassword("");
+    setShowPassword(false);
     setFormPhone("");
     setFormRole("admin");
     setProfileImage(null);
@@ -445,7 +453,7 @@ export default function AdminPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <AdminProfileImage
-                        src={getImage(admin)}
+                        src={admin.profileImage}
                         alt={admin.name}
                       />
 
@@ -631,7 +639,7 @@ export default function AdminPage() {
                 />
               </div>
 
-              {modalMode === "create" && (
+              {/* {modalMode === "create" && (
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-400">
                     Password
@@ -645,6 +653,39 @@ export default function AdminPage() {
                     placeholder="••••••••"
                     className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                   />
+                </div>
+              )} */}
+              {modalMode === "create" && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Password
+                  </label>
+
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={formPassword}
+                      onChange={(event) => setFormPassword(event.target.value)}
+                      placeholder="••••••••"
+                      className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 pr-11 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600"
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                    >
+                      {showPassword ? (
+                        <EyeOff className="size-4" />
+                      ) : (
+                        <Eye className="size-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -945,12 +986,57 @@ export default function AdminPage() {
   );
 }
 
-function AdminProfileImage({ src, alt }: { src: string; alt: string }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [imageSrc, setImageSrc] = useState(src);
+// function AdminProfileImage({ src, alt }: { src: string; alt: string }) {
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [imageSrc, setImageSrc] = useState(src);
 
-  const fallbackImage =
-    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
+//   const fallbackImage =
+//     "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
+
+//   return (
+//     <div className="relative size-10 shrink-0 overflow-hidden rounded-full border border-slate-100 bg-slate-50">
+//       {isLoading && (
+//         <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-50">
+//           <Loader2 className="size-4 animate-spin text-indigo-500" />
+//         </div>
+//       )}
+
+//       {/* eslint-disable-next-line @next/next/no-img-element */}
+//       <img
+//         src={imageSrc}
+//         alt={alt}
+//         className={`size-full object-cover transition-opacity duration-200 ${
+//           isLoading ? "opacity-0" : "opacity-100"
+//         }`}
+//         onLoad={() => {
+//           setIsLoading(false);
+//         }}
+//         onError={() => {
+//           if (imageSrc !== fallbackImage) {
+//             setImageSrc(fallbackImage);
+//           } else {
+//             setIsLoading(false);
+//           }
+//         }}
+//       />
+//     </div>
+//   );
+// }
+
+function AdminProfileImage({ src, alt }: { src?: string | null; alt: string }) {
+  const [isLoading, setIsLoading] = useState(!!src);
+  const [hasError, setHasError] = useState(false);
+
+  if (!src || hasError) {
+    return (
+      <div
+        className="flex size-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-400"
+        title="No profile image"
+      >
+        <UserRound className="size-5" />
+      </div>
+    );
+  }
 
   return (
     <div className="relative size-10 shrink-0 overflow-hidden rounded-full border border-slate-100 bg-slate-50">
@@ -962,20 +1048,15 @@ function AdminProfileImage({ src, alt }: { src: string; alt: string }) {
 
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={imageSrc}
+        src={src}
         alt={alt}
         className={`size-full object-cover transition-opacity duration-200 ${
           isLoading ? "opacity-0" : "opacity-100"
         }`}
-        onLoad={() => {
-          setIsLoading(false);
-        }}
+        onLoad={() => setIsLoading(false)}
         onError={() => {
-          if (imageSrc !== fallbackImage) {
-            setImageSrc(fallbackImage);
-          } else {
-            setIsLoading(false);
-          }
+          setIsLoading(false);
+          setHasError(true);
         }}
       />
     </div>
